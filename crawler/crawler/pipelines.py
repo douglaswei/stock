@@ -12,7 +12,7 @@ class IfengPipeline(object):
     def __init__(self):
         if not os.path.exists(STOCK_DATA_DIR):
             os.mkdir(STOCK_DATA_DIR)
-        output_filename = STOCK_DATA_DIR + "ifeng_" + TODAY_STR
+        output_filename = STOCK_DATA_DIR + os.path.sep + "ifeng_" + TODAY_STR
         if os.path.exists(output_filename):
             log.msg("file exists:[" + output_filename + "]", level=log.INFO)
         self.file = open(output_filename, 'a')
@@ -34,10 +34,10 @@ class IfengPipeline(object):
 
 class BestgoPipeline(object):
     def __init__(self):
-        out_dir = STOCK_DATA_DIR + '/bestgo/'
+        out_dir = STOCK_DATA_DIR + os.path.sep + 'bestgo'
         if not os.path.exists(out_dir):
             os.mkdir(out_dir)
-        output_filename = out_dir + DESIRED_DATE_STR
+        output_filename = out_dir + os.path.sep + DESIRED_DATE_STR
         if os.path.exists(output_filename):
             log.msg("file exists:[" + output_filename + "]", level=log.INFO)
         self.file = open(output_filename, 'a+')

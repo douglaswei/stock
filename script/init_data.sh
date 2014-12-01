@@ -15,10 +15,9 @@ execute()
 cd crawler
 cp $LOCAL_SETTING_FILE $LOCAL_SETTING_FILE_BK
 
-for i in {1..712}
+for idx in `seq 712`
 do
-    DATE=`date -v -${i}d +%Y%m%d`
-    execute sed -i ".b" "s/^DESIRED_DATE_STR.*$/DESIRED_DATE_STR='${DATE}'/" $LOCAL_SETTING_FILE
+    execute sed -i "s/^DATEDIFF.*$/DATEDIFF=${idx}/" $LOCAL_SETTING_FILE
     execute scrapy crawl stock_bestgo
 done
 

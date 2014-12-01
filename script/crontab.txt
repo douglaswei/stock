@@ -1,0 +1,1 @@
+43 * * * * * date > ~/test.txt

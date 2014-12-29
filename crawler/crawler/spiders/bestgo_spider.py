@@ -31,9 +31,15 @@ class BestgoSpider(CrawlSpider):
         url = "http://www.bestgo.com/hd/SH/%s/1,%d.html" % \
                 (DESIRED_DATE_STR, page_id)
         start_urls.append(url)
+        url = "http://www.bestgo.com/fund/%s/1,%d.html" % \
+                (DESIRED_DATE_STR, page_id)
+        start_urls.append(url)
+        url = "http://www.bestgo.com/hd/%s/1,%d.html" % \
+                (DESIRED_DATE_STR, page_id)
+        start_urls.append(url)
 
-    allowed_url = 'http://www.bestgo.com/fund/SH/' + DESIRED_DATE_STR + '/1.\d+\.html'
-    allowed_hd_url = 'http://www.bestgo.com/hd/SH/' + DESIRED_DATE_STR + '/1.\d+\.html'
+    allowed_url = 'http://www.bestgo.com/fund/.*' + DESIRED_DATE_STR + '/1.\d+\.html'
+    allowed_hd_url = 'http://www.bestgo.com/hd/.*' + DESIRED_DATE_STR + '/1.\d+\.html'
     rules = [
         Rule(SgmlLinkExtractor(allow=(allowed_url,)), follow = True, callback="parse_item"),
         Rule(SgmlLinkExtractor(allow=(allowed_hd_url,)), follow = True, callback="parse_hd_item"),
@@ -48,11 +54,15 @@ class BestgoSpider(CrawlSpider):
             if len(stock_items) < 16:
                 continue
             item = StockItem()
-            code = "sh" + stock_items[0].xpath('./a/span/text()')[0].extract()
+            district = 'sz'
+            if "SH" in response.url:
+                district = 'sh'
+            code = district + stock_items[0].xpath('./a/span/text()')[0].extract()
             records = []
             records.append( stock_items[2].xpath('./text()')[0].extract())
-            for idx in range(3, 17):
-                records.append(stock_items[idx].xpath('./text()')[0].extract())
+            for idx in range(2, 17):
+                item = stock_items[idx].xpath('./text()')[0].extract()
+                records.append(item)
             yield [code, records]
 
     def parse_item(self, response):

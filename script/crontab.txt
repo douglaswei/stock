@@ -1,1 +1,1 @@
-43 * * * * * date > ~/test.txt
+0 18 * * *  cd /home/wgz/proj/stock && sh script/daily_run.sh 1>log 2>log

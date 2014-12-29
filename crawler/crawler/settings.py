@@ -14,30 +14,32 @@ SPIDER_MODULES = ['crawler.spiders']
 NEWSPIDER_MODULE = 'crawler.spiders'
 
 DOWNLOADER_MIDDLEWARES = {
-    'crawler.random_user_agent.RandomUserAgentMiddleware': 400,
+    'crawler.random_user_agent.RandomUserAgentMiddleware': 200,
     'scrapy.contrib.downloadermiddleware.useragent.UserAgentMiddleware': None,
-    'scrapy.contrib.downloadermiddleware.httpproxy.HttpProxyMiddleware': 110,
-#    'scrapy.contrib.downloadermiddleware.retry.RetryMiddleware': 120,
+    'scrapy.contrib.downloadermiddleware.retry.RetryMiddleware': 1000,
 }
 
 ITEM_PIPELINES = {
     'crawler.pipelines.IfengPipeline': 300,
     'crawler.pipelines.BestgoPipeline': 400,
+    'crawler.pipelines.CatePipeline': 500,
+    'crawler.pipelines.DumpFilePipeline' : 600,
 }
 
 
 RANDOMIZE_DOWNLOAD_DELAY = True
 COOKIES_ENABLED = True
+ROBOTSTXT_OBEY = True
 
 CONCURRENT_REQUESTS = 100
-CONCURRENT_ITEMS = 10
-CONCURRENT_REQUESTS_PER_DOMAIN = 10
-DOWNLOAD_TIMEOUT = 30
+CONCURRENT_ITEMS = 100
+CONCURRENT_REQUESTS_PER_DOMAIN = 100
+DOWNLOAD_TIMEOUT = 130
 
 # 3.5 G max memory for use
 MEMUSAGE_LIMIT_MB = 3500
 
-RETRY_TIMES = 10
+RETRY_TIMES = 1000
 
 LOG_LEVEL = 'DEBUG'
 LOG_FILE = 'log'

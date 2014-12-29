@@ -1,21 +1,18 @@
 #! /bin/sh
 
 
+. script/common.sh
+
 LOCAL_SETTING_FILE="./crawler/local_settings.py"
 LOCAL_SETTING_FILE_BK=$LOCAL_SETTING_FILE".bk"
 
 # back local_setting
 
-execute()
-{
-    echo $@
-    `$@`
-}
 
 cd crawler
 cp $LOCAL_SETTING_FILE $LOCAL_SETTING_FILE_BK
 
-for idx in `seq 712`
+for idx in `seq 1000`
 do
     execute sed -i "s/^DATEDIFF.*$/DATEDIFF=${idx}/" $LOCAL_SETTING_FILE
     execute scrapy crawl stock_bestgo

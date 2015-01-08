@@ -14,19 +14,11 @@ class BaseFeatureExtractor(object):
     sh_code = "sh000001"
     _fieldMap = {
             'ma' : 0,
-            'ma5' : 1,
-            'ma10' : 2,
-            'ma20' : 3,
-            'exchange' : 4,
-            'exchange5' : 5,
-            'exchange10' : 6,
-            'exchange20' : 7,
-            'ma_gradient' : 8,
-            'hsl' : 9,
-            'ltsz' : 10,
-            'zjlr' : 11,
-            'ydjl' : 12,
-            'szdata' : 13,
+            'ma_gradient' : 1,
+            'exchange_rate' : 2,
+            'ltsz' : 3,
+            'zjlr' : 4,
+            'ydjl' : 5,
             }
 
 
@@ -76,19 +68,20 @@ class BaseFeatureExtractor(object):
         res_features = []
         func_dict = {
             'ma' : self.getMaFeatures,
-            'exchange' : self.getExchangeFeatures,
+            'exchange_rate' : self.getExchangeFeatures,
             'ltsz' : self.getLtszFeatures,
             'zjlr' : self.getZjlrFeatures,
             'ydjl' : self.getYdjlFeatures,
-            'szdata' : self.getSzdataFeatures
         }
         for key, func in func_dict.items():
             feat_dict = func(windowRecords[:, self._fieldMap[key]])
             if feat_dict is not None:
                 res_features.extend(["%s:%f" % (k,v) for k,v in feat_dict.items()])
         feat_dict = self.getExtraFeat(windowRecords)
-        if feat_dict is not None:
-            res_features.extend(["%s:%s" % (k,v) for (k,v) in feat_dict.items()])
+        if feat_dict is not None and len(feat_dict) > 0:
+            feats = sorted(["%s:%s" % (k,str(v)) for (k,v) in feat_dict.items()])
+            res_features.append('explain_feat:%d' % len(feats))
+            res_features.extend(feats)
 
         return res_features
 
@@ -160,11 +153,13 @@ class AdvancedFeatureExtractor(BaseFeatureExtractor):
         return {}
 
 
-class LrFeatureExtractor(AdvancedFeatureExtractor):
+class KnnFeatureExtractor(AdvancedFeatureExtractor):
     def getMaFeatures(self, records):
         '''
         '''
         return {
+            # 5天方差
+            'ma_variance_5' : _Variance(records[:5]),
             # 10天方差
             'ma_variance_10' : _Variance(records[:10]),
             # 20天方差
@@ -173,6 +168,10 @@ class LrFeatureExtractor(AdvancedFeatureExtractor):
             'ma_variance_30' : _Variance(records[:30]),
             # 60天的方差
             'ma_variance_60' : _Variance(records[:60]),
+            # 5天ma3涨幅
+            'ma_gradient_0_5_3_3' : _Grandient(records, 0, 5, 3, 3),
+            # 10天ma3涨幅
+            'ma_gradient_0_10_3_3' : _Grandient(records, 0, 10, 3, 3),
             # 20天ma3涨幅
             'ma_gradient_0_20_3_3' : _Grandient(records, 0, 20, 3, 3),
             # 30天ma5涨幅
@@ -193,22 +192,26 @@ class LrFeatureExtractor(AdvancedFeatureExtractor):
             'ma_gradient_0_0_1_60' : _Grandient(records, 0, 0, 1, 60),
             # ma1_ma100涨幅
             'ma_gradient_0_0_1_100' : _Grandient(records, 0, 0, 1, 100),
+            # 10天在处于上升通道的天数
+            'ma_cout_increase_days_10' : _CountDaysShangshenTongDao(records, 10),
+            # 30天在处于上升通道的天数
+            'ma_cout_increase_days_30' : _CountDaysShangshenTongDao(records, 30),
             # 60天在处于上升通道的天数
             'ma_cout_increase_days_60' : _CountDaysShangshenTongDao(records, 60),
         }
 
 
-class KnnFeatureExtractor(AdvancedFeatureExtractor):
+class LrFeatureExtractor(AdvancedFeatureExtractor):
     def getMaFeatures(self, records):
         '''
         '''
         feature_dict = {}
         # [5,20],[10,20],[20,30],[30,60] 上升通道
         # 小窗口3、5、10、20天的所有梯度
-        for sample_rate in [3, 5, 10, 20]:
-            grads = _GradientsBySample(records[:100], sample_rate)
+        for sample_rate in [3, 10]:
+            grads = _GradientsBySample(records[:60], sample_rate)
             for idx in range(len(grads)):
-                key = 'ma_grad_sample_%d_idx_%d' % (sample_rate, idx)
+                key = 'ma_grad_%d_%d' % (sample_rate, idx)
                 feature_dict[key] = grads[idx] * sample_rate * 100
 
         # 60天10天为小窗口内上升通道天数
@@ -229,27 +232,49 @@ class KnnFeatureExtractor(AdvancedFeatureExtractor):
 class ExplainableFeatureExtractor(BaseFeatureExtractor):
     def getExtraFeat(self, records):
         self.records_ma = records[:, self._fieldMap['ma']]
-        self.records_ex = records[:, self._fieldMap['exchange']]
+        self.records_ex = records[:, self._fieldMap['exchange_rate']]
         self.records_ltsz = records[:, self._fieldMap['ltsz']]
         self.records_zjlr = records[:, self._fieldMap['zjlr']]
         self.records_ydjl = records[:, self._fieldMap['ydjl']]
-        self.records_szdata = records[:, self._fieldMap['szdata']]
+        #self.records_szdata = records[:, self._fieldMap['szdata']]
         feat_dict = {}
         for attr in dir(self):
             if 'subFunc' in attr:
                 func = getattr(self, attr)
-                if func():
+                value = func()
+                if value:
                     key = func.__doc__#.decode("utf-8")
-                    feat_dict[key] = True
+                    feat_dict[key] = value
         return feat_dict
 
 
     def subFunc1(self):
         '''短线强势,duanXianQiangShi'''
-        if (_Grandient(self.records_ex, 0, 20, 20, 20) <= 1 \
+        if (_Grandient(self.records_ex, 0, 20, 20, 20) >= 1 \
                 and (_CountDaysShangshenTongDao(self.records_ma, 1) > 0) \
-                and (_Grandient(self.records_ma, 0, 60, 3, 3) > 0.3) \
-                and (_Grandient(self.records_ex, 0, 10, 10, 10) < 0) \
-                and (_Grandient(self.records_ma, 0, 0, 1, 5) < 0)):
+                and (_Grandient(self.records_ma, 0, 20, 3, 3) < 0.15) \
+                and (_Grandient(self.records_ma, 0, 10, 3, 3) < 0.1) \
+                and (_Grandient(self.records_ex, 0, 10, 10, 10) > 0)):
+            return True
+
+
+    def subFunc2(self):
+        '''上升通道,shangShengTongDao'''
+        if (_Grandient(self.records_ex, 0, 100, 100, 100) > 0 \
+                and (_Grandient(self.records_ex, 0, 0, 100, 10) > 1) \
+                and (_CountDaysShangshenTongDao(self.records_ma, 1) > 0) \
+                and (_Grandient(self.records_ex, 0, 10, 10, 10) > 0) \
+                and (_Grandient(self.records_ma, 0, 0, 5, 5) < 0) \
+                and (_Grandient(self.records_ma, 0, 0, 5, 10) > 0) \
+                and (_Grandient(self.records_ma, 0, 0, 5, 10) < 0.03)):
+            return True
+
+
+    def subFunc3(self):
+        '''持续平稳,chiXuPingWen'''
+        if ((_GradRange(self.records_ma, 0, 30, 1)[0] < 0.03) \
+                and (_GradRange(self.records_ma, 0, 30, 1)[1] > -0.03) \
+                and (_Grandient(self.records_ma, 0, 60, 3, 3) < 0.3) \
+                and (_Grandient(self.records_ma, 0, 100, 3, 3) < 0.5)):
             return True
 

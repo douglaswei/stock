@@ -3,6 +3,7 @@
 
 import sys
 import numpy as nu
+import random
 
 __all__ = [
     '_Mean',
@@ -19,6 +20,7 @@ __all__ = [
     '_TransFeatFromFloats',
     '_Variance',
     '_CountDaysShangshenTongDao',
+    '_GradRange',
 ]
 
 def _TransFeatFromFloats(featname, feats):
@@ -138,7 +140,8 @@ def _VehiCmp(records, big_window, small_window):
 def _Variance(records):
     '''方差'''
     mean_value = _Mean(records, 0, 10)
-    variance = sum(nu.power(records - mean_value, 2))
+    variance = sum(nu.power(records - mean_value, 2)) / len(records)
+    variance = nu.sqrt(variance)
     return variance
 
 
@@ -147,3 +150,40 @@ def _CountDaysShangshenTongDao(records, window_size):
     ma_list = [[5,20], [10,20], [20,30], [30,60]]
     return sum([_HoriCmp(records, ma_list, beg) for beg in range(window_size)])
 
+
+def _GradRange(records, beg, length, span=1):
+    max_gradient = -1
+    min_gradient = 1
+    for pos in range(beg, beg+length, span):
+        next_pos = pos + span
+        grad = _Grandient(records, pos, next_pos, span, span)
+        if grad > max_gradient:
+            max_gradient = grad
+        if grad < min_gradient:
+            min_gradient = grad
+    return (max_gradient, min_gradient)
+
+
+def _GradientIncDays(records, beg, length):
+    grad_list = _GradientsByList
+
+
+def _Sample(inFile, outFile, fieldIdx):
+    pos_line = 0
+    neg_line = 0
+    for line in open(inFile):
+        items = line[:-1].split('\t')
+        if float(items[fieldIdx]) > 0:
+            pos_line += 1
+        else:
+            neg_line += 1
+    ratio = float(pos_line) / neg_line
+    fout = open(outFile, 'w')
+    for line in open(inFile):
+        items = line[:-1].split('\t')
+        if float(items[fieldIdx]) <= 0:
+            rand = random.random()
+            if rand > ratio:
+                continue
+        fout.write(line)
+    fout.close()

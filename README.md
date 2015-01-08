@@ -9,24 +9,6 @@ stock项目分为以下几个模块：
 
 
 ##数据:
-### ifeng:
-0. stockCode
-1. cate
-2. date
-3. 开盘
-4. 最高价
-5. 收盘
-6. 最低价
-7. 成交手
-8. 均价diff
-9. 涨幅
-10. ma5
-11. ma10
-12. ma20
-13. 成交5
-14. 成交10
-15. 成交20
-16. 换手率
 
 ### bestgo_fund
 0. stockCode
@@ -73,19 +55,11 @@ stock项目分为以下几个模块：
 0. stockCode
 1. date
 2. ma
-3. ma5
-4. ma10
-5. ma20
-6. exchange
-7. exchange5
-8. exchange10
-9. exchange20
-10. ma_gradient
-11. hsl
-12. ltsz
-13. zjlr
-14. ydjl
-15. szdata
+3. ma_gradient
+4. exchange_rate
+5. 流通市值
+6. 资金净流入
+7. 隐单净量
 
 # generate feature
 

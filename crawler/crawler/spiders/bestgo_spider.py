@@ -24,19 +24,14 @@ class BestgoSpider(CrawlSpider):
     allowed_domains = ["bestgo.com",]
     start_urls = []
 
-    for page_id in range(1,32):
-        url = "http://www.bestgo.com/fund/SH/%s/1,%d.html" % \
-                (DESIRED_DATE_STR, page_id)
-        start_urls.append(url)
-        url = "http://www.bestgo.com/hd/SH/%s/1,%d.html" % \
-                (DESIRED_DATE_STR, page_id)
-        start_urls.append(url)
-        url = "http://www.bestgo.com/fund/%s/1,%d.html" % \
-                (DESIRED_DATE_STR, page_id)
-        start_urls.append(url)
-        url = "http://www.bestgo.com/hd/%s/1,%d.html" % \
-                (DESIRED_DATE_STR, page_id)
-        start_urls.append(url)
+    url = "http://www.bestgo.com/fund/SH/%s/1,1.html" % (DESIRED_DATE_STR)
+    start_urls.append(url)
+    url = "http://www.bestgo.com/hd/SH/%s/1,1.html" % (DESIRED_DATE_STR)
+    start_urls.append(url)
+    url = "http://www.bestgo.com/fund/%s/1,1.html" % (DESIRED_DATE_STR)
+    start_urls.append(url)
+    url = "http://www.bestgo.com/hd/%s/1,1.html" % (DESIRED_DATE_STR)
+    start_urls.append(url)
 
     allowed_url = 'http://www.bestgo.com/fund/.*' + DESIRED_DATE_STR + '/1.\d+\.html'
     allowed_hd_url = 'http://www.bestgo.com/hd/.*' + DESIRED_DATE_STR + '/1.\d+\.html'

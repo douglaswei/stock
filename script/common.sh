@@ -1,11 +1,12 @@
 #! /bin/sh
 
-LOGFILE="log"
-LOGFILE_WF="log.wf"
-
 execute()
 {
     date
     echo $@
     `$@`
 }
+
+DATE=`date +%Y%m%d_%H%M`
+DATA_DIR='data'
+

@@ -7,7 +7,6 @@ DATE=`date +%y%m%d`
 cd crawler
 
 execute /usr/local/bin/scrapy crawl stock_bestgo
-execute /usr/local/bin/scrapy crawl stock_ifeng
 
 cd ..
 
@@ -18,7 +17,9 @@ execute python script/merge_data.py data/raw_records data/records data/catefile
 # save records as pickle
 execute python script/saveAsPickle.py data/records data/pickle_record_dict
 
-execute python script/gen_train_valid_data.py data/pickle_record_dict data/catefile
+execute python script/gen_train_valid_data.py data/pickle_record_dict data/catefile LrFeatureExtractor 'data/lr'
+execute python script/gen_train_valid_data.py data/pickle_record_dict data/catefile KnnFeatureExtractor 'data/knn'
+execute python script/gen_train_valid_data.py data/pickle_record_dict data/catefile ExplainableFeatureExtractor 'data/explain'
 
 execute python script/extract_feature.py data/lr_train data/train_feature data/lr_test data/test_feature
 

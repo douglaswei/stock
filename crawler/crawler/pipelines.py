@@ -43,7 +43,7 @@ class BestgoPipeline(object):
         output_filename = out_dir + os.path.sep + DESIRED_DATE_STR
         if os.path.exists(output_filename):
             log.msg("file exists:[" + output_filename + "]", level=log.INFO)
-        self.file = open(output_filename, 'a+')
+        self.file = open(output_filename, 'w')
         if self.file is None:
             log.msg("file open fail:[" + output_filename + "]", level=log.ERROR)
 
@@ -94,11 +94,18 @@ class DumpFilePipeline(object):
 
 
     def process_item(self, item, spider):
-        fields = [k+':'+v for k,v in item.items()]
-        self.dump_file.write('\t'.join(fields).encode('utf-8') + '\n')
+        fields = []
+        for k,v in sorted(item.items(), key=lambda tups:tups[0]):
+            if v is not None:
+                fields.append(k+":"+str(v))
+        out_str = '\t'.join(fields).encode('utf-8')
+        self.dump_file.write(out_str + '\n')
         return item
 
 
 class DumpDBPipeline(object):
     def __init__(self):
         pass
+
+    def process_item(self, item, spider):
+        return item

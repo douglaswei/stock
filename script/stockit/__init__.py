@@ -3,7 +3,7 @@
 from .function import (
     TransFeatFromFloats,
     Mean,
-    Grandient,
+    Gradient,
     GradientAngle,
     ConNum,
     ContinousIncrease,

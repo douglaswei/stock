@@ -1,5 +1,6 @@
-from stockit.data import PrepareReocrds, StockRecordData, RecordsSampler
-from stockit.featExtractor import KnnFeatureExtractor
+from stockit.data import PrepareReocrds, StockRecordData, RecordsSampler, Unifoimer, FeatTranslator, IDFeatTranslator
+from stockit.featExtractor import KnnFeatureExtractor, LrFeatureExtractor
+from stockit.knn import v_main, collectInfo
 
 import logging 
 logging.basicConfig(level=logging.DEBUG, filename='log')
@@ -8,9 +9,15 @@ logging.basicConfig(level=logging.DEBUG, filename='log')
 import pickle
 import time
 
-data = StockRecordData()
-data.extractFeatures([KnnFeatureExtractor('test'),])
+StockRecordData().extractFeatures([LrFeatureExtractor('test'),])
 
-#data = RecordsSampler()
-#data.sample()
+RecordsSampler().sample('test_train', 'test_train_sample')
 
+Unifoimer().uniform(['test_train_sample', 'test_test'], ['test_train_sample_uniform', 'test_test_uniform'])
+
+FeatTranslator().translate('test_train_sample_uniform', 'knn_train', 3)
+FeatTranslator().translate('test_test_uniform', 'knn_test', 3)
+
+v_main()
+
+collectInfo('knn_output', 'knn_info')

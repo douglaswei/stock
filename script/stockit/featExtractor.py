@@ -145,19 +145,19 @@ class AdvancedFeatureExtractor(BaseFeatureExtractor):
     def getExchangeFeatures(self, records):
         return {
             # 5天换手率的变化率 * 100
-            'ex_gradient_0_5_5_5' : Grandient(records, 0, 5, 5, 5),
+            'ex_gradient_0_5_5_5' : Gradient(records, 0, 5, 5, 5),
             # 10天换手率的变化率 * 100
-            'ex_gradient_0_10_10_10' : Grandient(records, 0, 10, 10, 10),
+            'ex_gradient_0_10_10_10' : Gradient(records, 0, 10, 10, 10),
             # 20天换手率的变化率 * 100
-            'ex_gradient_0_20_20_20' : Grandient(records, 0, 20, 20, 20),
+            'ex_gradient_0_20_20_20' : Gradient(records, 0, 20, 20, 20),
             # 5_100天换手率的变化率 * 100
-            'ex_gradient_0_100_100_100' : Grandient(records, 0, 0, 5, 100),
+            'ex_gradient_0_100_100_100' : Gradient(records, 0, 0, 5, 100),
         }
 
 
     def getLtszFeatures(self, records):
         return {
-            'ltsz_grad_0_5_5_5' : Grandient(records, 0, 5, 5, 5),
+            'ltsz_grad_0_5_5_5' : Gradient(records, 0, 5, 5, 5),
             'ltsz_variance_10' : Variance(records[:10]),
             'ltsz_variance_20' : Variance(records[:20]),
             'ltsz_variance_30' : Variance(records[:30]),
@@ -167,7 +167,7 @@ class AdvancedFeatureExtractor(BaseFeatureExtractor):
 
     def getZjlrFeatures(self, records):
         return {
-            'zjlr_grad_0_5_5_5' : Grandient(records, 0, 5, 5, 5),
+            'zjlr_grad_0_5_5_5' : Gradient(records, 0, 5, 5, 5),
             'zjlr_postive_num_5' : CoutNonNeg(records, 5),
             'zjlr_postive_num_10' : CoutNonNeg(records, 10),
             'zjlr_variance_10' : Variance(records[:10]),
@@ -179,13 +179,13 @@ class AdvancedFeatureExtractor(BaseFeatureExtractor):
 
     def getYdjlFeatures(self, records):
         return {
-            'zjlr_grad_0_5_5_5' : Grandient(records, 0, 5, 5, 5),
-            'zjlr_postive_num_5' : CoutNonNeg(records, 5),
-            'zjlr_postive_num_10' : CoutNonNeg(records, 10),
-            'zjlr_variance_10' : Variance(records[:10]),
-            'zjlr_variance_20' : Variance(records[:20]),
-            'zjlr_variance_30' : Variance(records[:30]),
-            'zjlr_variance_60' : Variance(records[:60]),
+            'ydjl_grad_0_5_5_5' : Gradient(records, 0, 5, 5, 5),
+            'ydjl_postive_num_5' : CoutNonNeg(records, 5),
+            'ydjl_postive_num_10' : CoutNonNeg(records, 10),
+            'ydjl_variance_10' : Variance(records[:10]),
+            'ydjl_variance_20' : Variance(records[:20]),
+            'ydjl_variance_30' : Variance(records[:30]),
+            'ydjl_variance_60' : Variance(records[:60]),
         }
 
 
@@ -196,7 +196,7 @@ class AdvancedFeatureExtractor(BaseFeatureExtractor):
         '''
         return {
             "szdata_variance" : Variance(records[:10]),
-            "szdata_gradient10" : Grandient(records, 0, 0, 3, 10),
+            "szdata_gradient10" : Gradient(records, 0, 0, 3, 10),
             }
 
 
@@ -220,29 +220,29 @@ class KnnFeatureExtractor(AdvancedFeatureExtractor):
             # 60天的方差
             'ma_variance_60' : Variance(records[:60]),
             # 5天ma3涨幅
-            'ma_gradient_0_5_3_3' : Grandient(records, 0, 5, 3, 3),
+            'ma_gradient_0_5_3_3' : Gradient(records, 0, 5, 3, 3),
             # 10天ma3涨幅
-            'ma_gradient_0_10_3_3' : Grandient(records, 0, 10, 3, 3),
+            'ma_gradient_0_10_3_3' : Gradient(records, 0, 10, 3, 3),
             # 20天ma3涨幅
-            'ma_gradient_0_20_3_3' : Grandient(records, 0, 20, 3, 3),
+            'ma_gradient_0_20_3_3' : Gradient(records, 0, 20, 3, 3),
             # 30天ma5涨幅
-            'ma_gradient_0_30_5_5' : Grandient(records, 0, 30, 5, 5),
+            'ma_gradient_0_30_5_5' : Gradient(records, 0, 30, 5, 5),
             # 60天ma5涨幅
-            'ma_gradient_0_60_5_5' : Grandient(records, 0, 60, 5, 5),
+            'ma_gradient_0_60_5_5' : Gradient(records, 0, 60, 5, 5),
             # 100天ma10涨幅
-            'ma_gradient_0_100_10_10' : Grandient(records, 0, 100, 10, 10),
+            'ma_gradient_0_100_10_10' : Gradient(records, 0, 100, 10, 10),
             # 230天ma10涨幅
-            'ma_gradient_0_230_10_10' : Grandient(records, 0, 230, 10, 10),
+            'ma_gradient_0_230_10_10' : Gradient(records, 0, 230, 10, 10),
             # ma1_ma5涨幅
-            'ma_gradient_0_0_1_5' : Grandient(records, 0, 0, 1, 5),
+            'ma_gradient_0_0_1_5' : Gradient(records, 0, 0, 1, 5),
             # ma1_ma10涨幅
-            'ma_gradient_0_0_1_10' : Grandient(records, 0, 0, 1, 10),
+            'ma_gradient_0_0_1_10' : Gradient(records, 0, 0, 1, 10),
             # ma1_ma30涨幅
-            'ma_gradient_0_0_1_30' : Grandient(records, 0, 0, 1, 30),
+            'ma_gradient_0_0_1_30' : Gradient(records, 0, 0, 1, 30),
             # ma1_ma60涨幅
-            'ma_gradient_0_0_1_60' : Grandient(records, 0, 0, 1, 60),
+            'ma_gradient_0_0_1_60' : Gradient(records, 0, 0, 1, 60),
             # ma1_ma100涨幅
-            'ma_gradient_0_0_1_100' : Grandient(records, 0, 0, 1, 100),
+            'ma_gradient_0_0_1_100' : Gradient(records, 0, 0, 1, 100),
             # 10天在处于上升通道的天数
             'ma_cout_increase_days_10' : CountDaysShangshenTongDao(records, 10),
             # 30天在处于上升通道的天数
@@ -260,10 +260,10 @@ class LrFeatureExtractor(AdvancedFeatureExtractor):
         # [5,20],[10,20],[20,30],[30,60] 上升通道
         # 小窗口3、5、10、20天的所有梯度
         for sample_rate in [3, 10]:
-            grads = GradientsBySample(records[:60], sample_rate)
+            grads = GradientsBySample(records[:60], sample_rate, GradientAngle)
             for idx in range(len(grads)):
                 key = 'ma_grad_%d_%d' % (sample_rate, idx)
-                feature_dict[key] = grads[idx] * sample_rate * 100
+                feature_dict[key] = grads[idx]
 
         # 60天10天为小窗口内上升通道天数
         for idx in range(6):
@@ -301,23 +301,23 @@ class ExplainableFeatureExtractor(BaseFeatureExtractor):
 
     def subFunc1(self):
         '''短线强势,duanXianQiangShi'''
-        if (Grandient(self.records_ex, 0, 20, 20, 20) >= 1 \
+        if (Gradient(self.records_ex, 0, 20, 20, 20) >= 1 \
                 and (CountDaysShangshenTongDao(self.records_ma, 1) > 0) \
-                and (Grandient(self.records_ma, 0, 20, 3, 3) < 0.15) \
-                and (Grandient(self.records_ma, 0, 10, 3, 3) < 0.1) \
-                and (Grandient(self.records_ex, 0, 10, 10, 10) > 0)):
+                and (Gradient(self.records_ma, 0, 20, 3, 3) < 0.15) \
+                and (Gradient(self.records_ma, 0, 10, 3, 3) < 0.1) \
+                and (Gradient(self.records_ex, 0, 10, 10, 10) > 0)):
             return True
 
 
     def subFunc2(self):
         '''上升通道,shangShengTongDao'''
-        if (Grandient(self.records_ex, 0, 100, 100, 100) > 0 \
-                and (Grandient(self.records_ex, 0, 0, 100, 10) > 1) \
+        if (Gradient(self.records_ex, 0, 100, 100, 100) > 0 \
+                and (Gradient(self.records_ex, 0, 0, 100, 10) > 1) \
                 and (CountDaysShangshenTongDao(self.records_ma, 1) > 0) \
-                and (Grandient(self.records_ex, 0, 10, 10, 10) > 0) \
-                and (Grandient(self.records_ma, 0, 0, 5, 5) < 0) \
-                and (Grandient(self.records_ma, 0, 0, 5, 10) > 0) \
-                and (Grandient(self.records_ma, 0, 0, 5, 10) < 0.03)):
+                and (Gradient(self.records_ex, 0, 10, 10, 10) > 0) \
+                and (Gradient(self.records_ma, 0, 0, 5, 5) < 0) \
+                and (Gradient(self.records_ma, 0, 0, 5, 10) > 0) \
+                and (Gradient(self.records_ma, 0, 0, 5, 10) < 0.03)):
             return True
 
 
@@ -325,7 +325,7 @@ class ExplainableFeatureExtractor(BaseFeatureExtractor):
         '''持续平稳,chiXuPingWen'''
         if ((GradRange(self.records_ma, 0, 30, 1)[0] < 0.03) \
                 and (GradRange(self.records_ma, 0, 30, 1)[1] > -0.03) \
-                and (Grandient(self.records_ma, 0, 60, 3, 3) < 0.3) \
-                and (Grandient(self.records_ma, 0, 100, 3, 3) < 0.5)):
+                and (Gradient(self.records_ma, 0, 60, 3, 3) < 0.3) \
+                and (Gradient(self.records_ma, 0, 100, 3, 3) < 0.5)):
             return True
 

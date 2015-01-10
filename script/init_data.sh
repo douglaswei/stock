@@ -12,11 +12,8 @@ LOCAL_SETTING_FILE_BK=$LOCAL_SETTING_FILE".bk"
 cd crawler
 cp $LOCAL_SETTING_FILE $LOCAL_SETTING_FILE_BK
 
-for idx in `seq 680 1000`
-do
-    execute sed -i "s/^DATEDIFF.*$/DATEDIFF=${idx}/" $LOCAL_SETTING_FILE
-    execute scrapy crawl stock_bestgo
-done
+execute sed -i "s/^DATE_SPAN.*$/DATE_SPAN=1000/" $LOCAL_SETTING_FILE
+execute scrapy crawl stock_bestgo
 
 #execute scrapy crawl stock_ifeng
 

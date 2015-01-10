@@ -4,11 +4,12 @@
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
 
 import os
-from crawler.local_settings import STOCK_DATA_DIR, TODAY_STR, DESIRED_DATE_STR, DUMP_FILENAME
+from crawler.local_settings import STOCK_DATA_DIR, DUMP_FILENAME
 from crawler.items import StockItem
 from scrapy import log
-from datetime import date
+from datetime import datetime,date
 
+'''
 class IfengPipeline(object):
     def __init__(self):
         if not os.path.exists(STOCK_DATA_DIR):
@@ -33,14 +34,15 @@ class IfengPipeline(object):
             self.file.write("\t".join(fields)+"\n")
 
         return item
-
+'''
 
 class BestgoPipeline(object):
     def __init__(self):
         out_dir = STOCK_DATA_DIR + os.path.sep + 'bestgo'
         if not os.path.exists(out_dir):
             os.mkdir(out_dir)
-        output_filename = out_dir + os.path.sep + DESIRED_DATE_STR
+        CURRENT_TIME = datetime.today().strftime("%Y%m%d_%H%M%S")
+        output_filename = out_dir + os.path.sep + CURRENT_TIME
         if os.path.exists(output_filename):
             log.msg("file exists:[" + output_filename + "]", level=log.INFO)
         self.file = open(output_filename, 'w')
@@ -54,7 +56,7 @@ class BestgoPipeline(object):
         fields = []
         fields.append(item['code'])
         fields.append(item['cate'])
-        fields.append(DESIRED_DATE_STR)
+        fields.append(item['date'])
         fields.extend(item['records'][1:])
         self.file.write("\t".join(fields)+"\n")
 
@@ -90,7 +92,7 @@ class DumpFilePipeline(object):
         if not os.path.exists(DUMP_FILENAME):
             log.msg("file exists:[%s]" % DUMP_FILENAME)
         filename = DUMP_FILENAME + '_' + date.today().strftime('%Y%m%d')
-        self.dump_file = open(filename, 'w')
+        self.dump_file = open(filename, 'a')
 
 
     def process_item(self, item, spider):

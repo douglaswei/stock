@@ -5,141 +5,148 @@ import sys
 import os
 import gc
 import pickle
-import numpy as nu
+import numpy as np
 import sklearn as sk
 from sklearn.cluster import KMeans
-from draw import drawLines
-
-dict_postive_percent = {}
-dict_predict_cluster = {}
-
-# return nu.ndarray
-def loadData(fileName, begin_field):
-    raw_records = []
-    records = []
-    for line in open(fileName):
-        fields = line[:-1].split('\t')
-        raw_records.append(fields)
-        records.append( [float(field) for field in fields[begin_field:]] )
-    return raw_records, nu.asarray(records)
+import common
 
 
-# return KMeans
-def trainModel(data, n_clusters):
-    model = KMeans(init='k-means++', n_clusters = n_clusters, n_init = 10)
-    model.fit(data)
-    return model
+######################################################
+
+class KnnClassifer(object):
+    def __init__(self, config = common.config()):
+        self.config = config
+        self.train_lable = None
+        self.train_data = None
+        self.test_label = None
+        self.test_data = None
+        self.model = None
+        self.cluster_info_dict = {}
+        self.predict_result_dict = {}
+
+    def __del__(self):
+        pass
+
+    def knn(self):
+        out_filename = self.config.knn_dir + self.config.knn_output_filename
+        train_filename = self.config.knn_dir + self.config.knn_train_filename
+        test_filename = self.config.knn_dir + self.config.knn_test_filename
+        feat_begin_idx = self.config.feat_begin_idx
+        fout = open(out_filename, 'w')
+
+        for i_cluster in self.config.knn_clusters:
+            self.train_predict(i_cluster,
+                    train_filename,
+                    test_filename,
+                    feat_begin_idx,
+                    fout)
+    
+    def train_predict(self, n_clusters, train_filename, test_filename, feat_begin_idx, fout):
+        self.n_clusters = n_clusters
+        self.feat_begin_idx = feat_begin_idx
+        
+        self.train_lable, self.train_data = self.__loadData(train_filename)
+        self.test_label, self.test_data = self.__loadData(test_filename)
+
+        model = self.__trainModel(self.train_data, n_clusters)
+        train_cluster, train_distance = self.__predict(model, self.train_data)
+        test_cluster, test_distance = self.__predict(model, self.train_data)
+
+        self.__collectClusterInfo(train_cluster, self.train_lable, fout)
+        self.__collectPredictRes(self.train_lable, train_cluster, train_distance, fout, True)
+        self.__collectPredictRes(self.test_label, test_cluster, test_distance, fout, False)
 
 
-def getPredictResults(model, nu_train_data, raw_data):
-    clusters = model.predict(nu_train_data)
-    distances = model.transform(nu_train_data)
-    result = {}
-    for i_cluster in range(distances.shape[1]):
-        cluster_code_date_label_dis =[raw_data[idx][:3] + [str(distances[idx][i_cluster]),] \
-                for idx in range(len(clusters))  if clusters[idx] == i_cluster]
-        result[i_cluster] = sorted(cluster_code_date_label_dis, key=lambda item:item[3])
-    return result
-
-def saveTrainData(fout, cluster_info):
-    prefix = 'train'
-    n_clusters = len(cluster_info.keys())
-    for i_cluster in cluster_info.keys():
-        cluster_info_i = cluster_info[i_cluster]
-        pos_num = sum([int(float(item[2])>0) for item in cluster_info_i])
-        total_num = len(cluster_info[i_cluster])
-        for [code, date, label, dis] in cluster_info[i_cluster]:
-            fout.write('%s_%d_%d\t%s\t%s\t%s\t%s\n' % \
-                    (prefix, n_clusters, i_cluster, dis, label, code, date))
-
-        fout.write('%s_%d_%d:postive percent:%.2f%%, total_num:%d\n' % \
-                (prefix, n_clusters, i_cluster, pos_num * 100.0 / total_num, total_num))
-        key = '%d_%d' % (n_clusters, i_cluster)
-        dict_postive_percent[key] = [pos_num * 100.0 / total_num , total_num]
+    def __loadData(self, filename):
+        label = []
+        data = []
+        for line in open(filename):
+            items = line[:-1].split('\t')
+            label.append(items[:self.feat_begin_idx])
+            data.append([float(ele.split(':')[1]) for ele in items[self.feat_begin_idx:]])
+        return np.asarray(label), np.asarray(data)
 
 
-def saveTestData(fout, cluster_info):
-    prefix = 'test'
-    n_clusters = len(cluster_info.keys())
-    for i_cluster in cluster_info.keys():
-        cluster_info_i = cluster_info[i_cluster]
-        cluster_value = '%d_%d' % (n_clusters, i_cluster)
-        for [code, date, label, dis] in cluster_info[i_cluster]:
-            key = code + '\t' + date
-            value = dict_predict_cluster.get(key, [])
-            value.append(cluster_value)
-            dict_predict_cluster[key] = value
-            fout.write('%s_%d_%d\t%s\t%s\t%s\t%s\n' % \
-                    (prefix, n_clusters, i_cluster, dis, label, code, date))
+    def __trainModel(self, train_data, n_clusters):
+        if self.model is not None:
+            del self.model
+            gc.collect()
+        self.model = KMeans(init='k-means++', n_clusters = n_clusters, n_init = 10)
+        self.model.fit(train_data)
+        return self.model
 
 
-def writeTestData(fout):
-    for k,v in dict_predict_cluster.items():
-        value = []
-        for cluster in v:
-            pos_percent, total_num = dict_postive_percent[cluster]
-            if (pos_percent > 30) and (total_num > 1):
-                value.append('%s-%f-%d' % (cluster, pos_percent, total_num))
-        if len(value) > 0:
-            fout.write(k + '\t' + "clusters\t" + str(len(value)) + '\t' + '\t'.join(value) + '\n')
+    def __predict(self, model, data):
+        cluster_res = model.predict(data)
+        distances = model.transform(data)
+        return cluster_res, distances
+
+    
+    def __collectClusterInfo(self, cluster_res, labels, fout):
+        for cluster_idx in range(self.n_clusters):
+            cluster_record_idxs = filter(lambda x: cluster_res[x] == cluster_idx,
+                    range(cluster_res.shape[0]))
+            record_num = len(cluster_record_idxs)
+
+            postive_record_idxs = filter(lambda x: float(labels[x][2])>0, cluster_record_idxs)
+            postive_num = len(postive_record_idxs)
+            k = self.__getClusterDescription(self.n_clusters, cluster_idx)
+            v_d = self.cluster_info_dict.get(k, {})
+            v_d['n'] = record_num
+            v_d['np'] = postive_num
+            v_d['p'] = float(postive_num) / record_num
+            self.cluster_info_dict[k] = v_d
+            fout.write('%s\t%d:%d:%f\n' % (k, v_d['n'], v_d['np'], v_d['p']))
 
 
-def uniform_with_max_min(data, max_data, min_data):
-    for record in data:
-        for idx in range(record.shape[0]):
-            record[idx] = (float(record[idx]) - min_data[idx]) / (max_data[idx] - min_data[idx])
+    def __collectPredictRes(self, labels, cluster_res, distances, fout, is_train=False):
+        for i_cluster, i_label in zip(range(len(cluster_res)), labels):
+            cluster_desc = self.__getClusterDescription(self.n_clusters, cluster_res[i_cluster])
+            prefix = 'train:'
+            if not is_train:
+                prefix = 'test:'
+            label_desc = prefix + ':'.join(i_label)
+            v_d = self.cluster_info_dict[cluster_desc]
+            if v_d['n'] > self.config.knn_threshold_num \
+                    and v_d['p'] > self.config.knn_threshold_percent:
+                fout.write('%s\t%s:%d:%d:%f\n' % (label_desc, cluster_desc, v_d['n'], v_d['np'], v_d['p']))
 
 
-def uniform_data(train_data, test_data):
-    max_data = nu.asarray([
-            nu.max(train_data, axis=0),
-            nu.max(test_data, axis=0),
-    ])
-    min_data = nu.asarray(
-            [nu.min(train_data, axis=0),
-            nu.min(test_data, axis=0)
-    ])
-    max_thrd = nu.max(max_data, axis=0)
-    min_thrd = nu.min(min_data, axis=0)
-    uniform_with_max_min(train_data, max_thrd, min_thrd)
-    uniform_with_max_min(test_data, max_thrd, min_thrd)
+    def __getClusterDescription(self, n_clusters, i_cluster):
+        return 'cluster_' + str(n_clusters) + '_' + str(i_cluster)
 
 
-def main(train_filename,
-        test_filename,
-        out_filename,
-        pickle_filename,
-        label_field,
-        cluster_list):
+def collectInfo(in_filename, out_filename):
+    code_clusters_dict = {}
+    for line in open(in_filename):
+        if 'train' in line or 'test' in line:
+            items = line[:-1].split('\t')
+            k, v = items
+            clusters = code_clusters_dict.get(k, [])
+            clusters.append(v)
+            code_clusters_dict[k] = clusters
+    
+    res_list = []
+    for k, clusters in code_clusters_dict.items():
+        res = [k]
+        for cluster in clusters:
+            res.append('\t' + cluster)
+        res_list.append(res)
+
     fout = open(out_filename, 'w')
-    # 1. load data set
-    raw_train_data, nu_train_data = loadData(train_filename, label_field)
-    raw_test_data, nu_test_data = loadData(test_filename, label_field)
-    # uniform data
-    #uniform_data(nu_train_data, nu_test_data)
-    for n_cluster in (int(item) for item in cluster_list.split(',')):
-        # 2. train model
-        model = trainModel(nu_train_data, n_cluster)
-        # 3. predict train_data
-        # return dict {cluster: [] code, date, label, dis}
-        cluster_info_train = getPredictResults(model, nu_train_data, raw_train_data)
-        # 4. predict test_data
-        cluster_info_test = getPredictResults(model, nu_test_data, raw_test_data)
-        # 5. save res
-        saveTrainData(fout, cluster_info_train)
-        saveTestData(fout, cluster_info_test)
-        del model
-        gc.collect()
-    writeTestData(fout)
-    fout.close()
-    return
+    for res in sorted(res_list, key=lambda x: [len(x), x[0]], reverse = True):
+        fout.write('\t'.join(res) + '\n')
+
+
+
+
+
+def v_main():
+    config = init_config()
+    knn = KnnClassifer(config)
+    knn.knn()
 
 
 if __name__ == "__main__":
-    main(sys.argv[1],
-            sys.argv[2],
-            sys.argv[3],
-            sys.argv[4],
-            int(sys.argv[5]),
-            sys.argv[6],
-    )
+    v_main()
+

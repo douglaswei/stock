@@ -9,7 +9,7 @@ import random
 __all__ = [
     'TransFeatFromFloats',
     'Mean',
-    'Grandient',
+    'Gradient',
     'GradientAngle',
     'ConNum',
     'ContinousIncrease',
@@ -40,9 +40,9 @@ def Mean(records, beg, length):
     return np.mean(records[beg : beg + length])
 
 
-def Grandient(records, cur, prev, frame_size=1, prev_frame_size=1):
+def Gradient(records, cur, prev, frame_size=1, prev_frame_size=1):
     '''
-    Grandient(cur_pos, prev_pos, frame_size, prev_frame_size)
+    Gradient(cur_pos, prev_pos, frame_size, prev_frame_size)
     = ( Mean(c,f) - Mean(p,pf) ) / Mean(p,pf)
     '''
     cur_val = Mean(records, cur, frame_size)
@@ -80,7 +80,7 @@ def ContinousIncrease(records, li, thres):
     return 1 of 0 if the list is continously increase
     '''
     for idx in range(len(li)):
-        if Grandient(records, idx, 1, idx+1, 1) < thres:
+        if Gradient(records, idx, 1, idx+1, 1) < thres:
             return 0
     return 1
 
@@ -103,7 +103,7 @@ def CoutNonNeg(records, n):
     return len(filtered_records)
 
 
-def GradientsBySample(records, sample_rate):
+def GradientsBySample(records, sample_rate, grad_func=Gradient):
     '''
     gradients of records sample by sample_rate
     '''
@@ -114,7 +114,7 @@ def GradientsBySample(records, sample_rate):
 
     for idx in range(len(sample_records) - 1):
         for idy in range(idx + 1, len(sample_records)):
-            sample_gradient.append(Grandient(sample_records ,idx ,idy))
+            sample_gradient.append(Gradient(sample_records ,idx ,idy))
 
     mean_value = np.mean(sample_records)
 
@@ -137,7 +137,7 @@ def GenRate(records):
     '''
     todo
     '''
-    gradient_list = [Grandient(records, idx, idx+1, 1, 1) > 0 for idx in range(len(records) - 1)]
+    gradient_list = [Gradient(records, idx, idx+1, 1, 1) > 0 for idx in range(len(records) - 1)]
     freq_list = []
     pre = None
     for idx in range(len(gradient_list) - 1):
@@ -201,7 +201,7 @@ def GradMaxMin(records, beg, length, span=1):
     min_gradient = 1
     for pos in range(beg, beg+length, span):
         next_pos = pos + span
-        grad = Grandient(records, pos, next_pos, span, span)
+        grad = Gradient(records, pos, next_pos, span, span)
         if grad > max_gradient:
             max_gradient = grad
         if grad < min_gradient:

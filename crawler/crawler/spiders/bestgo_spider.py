@@ -12,29 +12,31 @@ from scrapy.contrib.linkextractors.sgml import SgmlLinkExtractor
 from scrapy.selector import Selector
 
 from crawler.items import StockItem
-from crawler.local_settings import DESIRED_DATE_STR
+from crawler.local_settings import DESIRED_DATES
 
 from datetime import date
 from datetime import timedelta
 import json
 import urlparse
+import re
 
 class BestgoSpider(CrawlSpider):
     name = "stock_bestgo"
     allowed_domains = ["bestgo.com",]
     start_urls = []
 
-    url = "http://www.bestgo.com/fund/SH/%s/1,1.html" % (DESIRED_DATE_STR)
-    start_urls.append(url)
-    url = "http://www.bestgo.com/hd/SH/%s/1,1.html" % (DESIRED_DATE_STR)
-    start_urls.append(url)
-    url = "http://www.bestgo.com/fund/%s/1,1.html" % (DESIRED_DATE_STR)
-    start_urls.append(url)
-    url = "http://www.bestgo.com/hd/%s/1,1.html" % (DESIRED_DATE_STR)
-    start_urls.append(url)
+    for date in DESIRED_DATES:
+        url = "http://www.bestgo.com/fund/SH/%s/1,1.html" % (date)
+        start_urls.append(url)
+        url = "http://www.bestgo.com/hd/SH/%s/1,1.html" % (date)
+        start_urls.append(url)
+        url = "http://www.bestgo.com/fund/%s/1,1.html" % (date)
+        start_urls.append(url)
+        url = "http://www.bestgo.com/hd/%s/1,1.html" % (date)
+        start_urls.append(url)
 
-    allowed_url = 'http://www.bestgo.com/fund/.*' + DESIRED_DATE_STR + '/1.\d+\.html'
-    allowed_hd_url = 'http://www.bestgo.com/hd/.*' + DESIRED_DATE_STR + '/1.\d+\.html'
+    allowed_url = 'http://www.bestgo.com/fund/.*\d{6}/1.\d+\.html'
+    allowed_hd_url = 'http://www.bestgo.com/hd/.*\d{6}/1.\d+\.html'
     rules = [
         Rule(SgmlLinkExtractor(allow=(allowed_url,)), follow = True, callback="parse_item"),
         Rule(SgmlLinkExtractor(allow=(allowed_hd_url,)), follow = True, callback="parse_hd_item"),
@@ -61,19 +63,29 @@ class BestgoSpider(CrawlSpider):
             yield [code, records]
 
     def parse_item(self, response):
+        date = self.getDate(response.url)
         for [code, records] in self.extract_item(response):
             item = StockItem()
             item['code'] = code
             item['records'] = records
             item['cate'] = 'fund'
+            item['date'] = date
             yield item
 
     def parse_hd_item(self, response):
+        date = self.getDate(response.url)
         for [code, records] in self.extract_item(response):
             item = StockItem()
             item['code'] = code
             item['records'] = records
             item['cate'] = 'hd'
+            item['date'] = date
             yield item
 
 
+    def getDate(self, url):
+        m = re.search(r'(\d{8})', url)
+        if not m:
+            self.log('date no found in url')
+        date = m.group(0)
+        return date

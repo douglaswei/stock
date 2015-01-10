@@ -8,8 +8,13 @@
 from datetime import date
 from datetime import timedelta
 
-DATEDIFF=0
-DESIRED_DATE_STR=(date.today() - timedelta(days=DATEDIFF)).strftime('%Y%m%d')
+DATE_BEGIN=0
+DATE_SPAN=2
+DESIRED_DATES = []
+for i in range(DATE_SPAN):
+    date_string = (date.today() - timedelta(days=DATE_BEGIN + i)).strftime('%Y%m%d')
+    DESIRED_DATES.append(date_string)
+
 TODAY_STR=(date.today()).strftime('%Y%m%d')
 
 STOCK_CODES_BLACKLIST=[

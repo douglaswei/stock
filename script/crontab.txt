@@ -1,1 +1,2 @@
 0 18 * * *  cd /home/wgz/proj/stock && sh script/daily_run.sh 1>log 2>log
+0 19 * * *  cd /home/wgz/proj/stock/script && python test.py0 1>log 2>log

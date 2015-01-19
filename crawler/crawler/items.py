@@ -81,7 +81,10 @@ class SymptomsDiseaseItem(Item):
     sex = Field()
 
 class StockItem(Item):
+    channel = Field()
     code = Field()
-    records = Field()
+    sub_code = Field()
     cate = Field()
     date = Field()
+    name = Field()
+    records = Field()

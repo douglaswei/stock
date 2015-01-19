@@ -3,38 +3,16 @@
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
 
+# coding = utf-8
+
 import os
+import codecs
+
 from crawler.local_settings import STOCK_DATA_DIR, DUMP_FILENAME
 from crawler.items import StockItem
 from scrapy import log
 from datetime import datetime,date
 
-'''
-class IfengPipeline(object):
-    def __init__(self):
-        if not os.path.exists(STOCK_DATA_DIR):
-            os.mkdir(STOCK_DATA_DIR)
-        output_filename = STOCK_DATA_DIR + os.path.sep + "ifeng_" + TODAY_STR
-        if os.path.exists(output_filename):
-            log.msg("file exists:[" + output_filename + "]", level=log.INFO)
-        self.file = open(output_filename, 'a')
-        if self.file is None:
-            log.msg("file open fail:[" + output_filename + "]", level=log.ERROR)
-
-    def process_item(self, item, spider):
-        if not isinstance(item, StockItem) or item['cate'] != 'ifeng':
-            return item
-
-        for record in item["records"]:
-            fields = []
-            fields.append(item['code'])
-            fields.append(item['cate'])
-            fields.extend(record)
-            fields[2] = "".join(fields[2].split('-'))
-            self.file.write("\t".join(fields)+"\n")
-
-        return item
-'''
 
 class BestgoPipeline(object):
     def __init__(self):
@@ -51,11 +29,11 @@ class BestgoPipeline(object):
 
     def process_item(self, item, spider):
         if (not isinstance(item, StockItem)) or \
-                (item['cate'] != 'fund' and item['cate'] != 'hd'):
+                (item['channel'] != 'fund' and item['channel'] != 'hd'):
             return item
         fields = []
         fields.append(item['code'])
-        fields.append(item['cate'])
+        fields.append(item['channel'])
         fields.append(item['date'])
         fields.extend(item['records'][1:])
         self.file.write("\t".join(fields)+"\n")
@@ -70,17 +48,17 @@ class CatePipeline(object):
         output_filename = STOCK_DATA_DIR + os.path.sep + "ifeng_cate"
         if os.path.exists(output_filename):
             log.msg("file exists:[" + output_filename + "]", level=log.INFO)
-        self.file = open(output_filename, 'w')
+        self.file = codecs.open(output_filename, 'w')
         if self.file is None:
             log.msg("file open fail:[" + output_filename + "]", level=log.ERROR)
 
     def process_item(self, item, spider):
-        if not isinstance(item, StockItem) or item['cate'] != 'cate':
+        if not isinstance(item, StockItem) or item['channel'] != 'cate':
             return item
 
         fields = []
         fields.append(item['code'])
-        fields.append(item['cate'])
+        fields.append(item['channel'])
         fields.extend(item['records'])
         self.file.write("\t".join(fields)+"\n")
 
@@ -91,16 +69,18 @@ class DumpFilePipeline(object):
     def __init__(self):
         if not os.path.exists(DUMP_FILENAME):
             log.msg("file exists:[%s]" % DUMP_FILENAME)
-        filename = DUMP_FILENAME + '_' + date.today().strftime('%Y%m%d')
-        self.dump_file = open(filename, 'a')
-
+        filename = DUMP_FILENAME + '_' + datetime.today().strftime('%Y%m%d_%H%M%S')
+        self.dump_file = codecs.open(filename, 'w', 'utf-8')
 
     def process_item(self, item, spider):
         fields = []
         for k,v in sorted(item.items(), key=lambda tups:tups[0]):
             if v is not None:
-                fields.append(k+":"+str(v))
-        out_str = '\t'.join(fields).encode('utf-8')
+                if isinstance(v, list):
+                    v = '|'.join(v)
+                v= v.replace(',', '')
+                fields.append(k + ":" + v)
+        out_str = '\t'.join(fields)
         self.dump_file.write(out_str + '\n')
         return item
 

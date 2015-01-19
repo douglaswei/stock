@@ -68,7 +68,7 @@ class BestgoSpider(CrawlSpider):
             item = StockItem()
             item['code'] = code
             item['records'] = records
-            item['cate'] = 'fund'
+            item['channel'] = 'fund'
             item['date'] = date
             yield item
 
@@ -78,7 +78,7 @@ class BestgoSpider(CrawlSpider):
             item = StockItem()
             item['code'] = code
             item['records'] = records
-            item['cate'] = 'hd'
+            item['channel'] = 'hd'
             item['date'] = date
             yield item
 

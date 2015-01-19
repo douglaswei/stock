@@ -6,25 +6,25 @@ from stockit.label import labelGenerate
 from stockit.common import config
 
 import logging 
-#logging.basicConfig(level=logging.DEBUG, filename='log')
+logging.basicConfig(level=logging.DEBUG, filename='log')
 
-#PrepareReocrds().merge()
+PrepareReocrds().merge()
 import pickle
 import time
 
-#StockRecordData().extractFeatures([LrFeatureExtractor('test'),], labelGenerate)
+StockRecordData().extractFeatures([LrFeatureExtractor('test'),], labelGenerate)
 
-#RecordsSampler().sample('test_train', 'test_train_sample')
+RecordsSampler().sample('test_train', 'test_train_sample')
 
-#Unifoimer().uniform(['test_train_sample', 'test_test'], ['test_train_sample_uniform', 'test_test_uniform'])
+Unifoimer().uniform(['test_train_sample', 'test_test'], ['test_train_sample_uniform', 'test_test_uniform'])
 
-#FeatTranslator().translate('test_train_sample_uniform', 'lr_train', 3)
-#FeatTranslator().translate('test_test_uniform', 'lr_test', 3)
+FeatTranslator().translate('test_train_sample_uniform', 'lr_train', 3)
+FeatTranslator().translate('test_test_uniform', 'lr_test', 3)
 
-#v_main()
+v_main()
 
 collectInfo('knn_output', 'knn_info')
 
-#data = BaseLr(config())
-#data.prepareData()
-#data.run()
+data = BaseLr(config())
+data.prepareData()
+data.run()

@@ -1,9 +1,10 @@
 #! /usr/bin/python
-# -*- coding: utf-8 -*-
+# -*- coding:utf-8 -*-
 
 import sys
 import numpy as np
 import random
+import logging
 
 
 __all__ = [
@@ -57,7 +58,7 @@ def GradientAngle(records, cur, prev, frame_size=1, prev_frame_size=1):
     the angle value of gradient : when Gradient>1, it increases too quick
 
     '''
-    return np.arctan(Gradient(record, cur, prev, frame_size, prev_frame_size))
+    return np.arctan(Gradient(records, cur, prev, frame_size, prev_frame_size))
 
     
 def ConNum(records, li):
@@ -209,4 +210,33 @@ def GradMaxMin(records, beg, length, span=1):
     return (max_gradient, min_gradient)
 
 
+def get_fuquan_rate(ma_cur, ma_prev, ma_gradient):
+    '''
+    计算复权调整股价比例
+    '''
+    if ma_prev is None:
+        return 1
+    ma_gradient = 1 + (float(ma_gradient)/100)
+    org_price = ma_prev / ma_gradient
+    rate = org_price / ma_cur
+    rate = round(rate, 2)
+    return rate
+
+
+def adjust_gegu_records(records):
+    '''
+    价格字段 做复权处理
+    '''
+    rate = 1.0
+    prev_ma = None
+    ma_gradient = None
+    for record in records:
+        ma = record.ma
+        new_rate = get_fuquan_rate(ma, prev_ma, ma_gradient)
+        if prev_ma:
+            logging.debug('%s:%s:%f:%f:%f' % (record.code, str(record.cdate), ma, prev_ma, new_rate))
+        rate *= new_rate
+        record.ma = round(record.ma*rate, 3)
+        ma_gradient = record.ma_gradient
+        prev_ma = ma
 

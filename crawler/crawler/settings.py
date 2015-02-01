@@ -25,10 +25,11 @@ ITEM_PIPELINES = {
     'crawler.pipelines.BestgoPipeline': 400,
     'crawler.pipelines.CatePipeline': 500,
     'crawler.pipelines.DumpFilePipeline' : 600,
+    'crawler.pipelines.DumpDBPipeline' : 700,
 }
 
 
-RANDOMIZE_DOWNLOAD_DELAY = True
+RANDOMIZE_DOWNLOAD_DELAY = False
 COOKIES_ENABLED = False
 ROBOTSTXT_OBEY = False
 
@@ -36,7 +37,7 @@ CONCURRENT_REQUESTS = 100
 CONCURRENT_ITEMS = 100
 CONCURRENT_REQUESTS_PER_DOMAIN = 100
 DOWNLOAD_TIMEOUT = 50
-DOWNLOAD_DELAY = 3
+DOWNLOAD_DELAY = 1.1
 
 # 3.5 G max memory for use
 MEMUSAGE_LIMIT_MB = 3500

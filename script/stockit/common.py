@@ -7,7 +7,8 @@ sh_code = "sh000001"
 class config():
     raw_records_file = '../data/raw_records'
     records_file = './knn/test_records'
-    feat_window = 250
+    pickle_records_file = 'pickle_records'
+    feat_window = 100
     label_window = 5
     upper_threohold = 0.4
     lower_thredhold = -0.1
@@ -53,6 +54,8 @@ class config():
     lr_test_res_filename = 'test_res'
 
     lr_res_filename = 'lr_res'
+
+    db_string = 'sqlite:///./sqlalchemy.db'
 
 
 

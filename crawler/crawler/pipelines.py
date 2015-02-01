@@ -8,10 +8,11 @@
 import os
 import codecs
 
-from crawler.local_settings import STOCK_DATA_DIR, DUMP_FILENAME
+from crawler.local_settings import STOCK_DATA_DIR, DUMP_FILENAME, DB_STR
 from crawler.items import StockItem
 from scrapy import log
 from datetime import datetime,date
+from crawler.model.orm import DB_Engine
 
 
 class BestgoPipeline(object):
@@ -34,7 +35,7 @@ class BestgoPipeline(object):
         fields = []
         fields.append(item['code'])
         fields.append(item['channel'])
-        fields.append(item['date'])
+        fields.append(item['cdate'])
         fields.extend(item['records'][1:])
         self.file.write("\t".join(fields)+"\n")
 
@@ -78,7 +79,9 @@ class DumpFilePipeline(object):
             if v is not None:
                 if isinstance(v, list):
                     v = '|'.join(v)
-                v= v.replace(',', '')
+                if isinstance(v, datetime):
+                    v = str(v)
+                v = v.replace(',', '')
                 fields.append(k + ":" + v)
         out_str = '\t'.join(fields)
         self.dump_file.write(out_str + '\n')
@@ -87,7 +90,10 @@ class DumpFilePipeline(object):
 
 class DumpDBPipeline(object):
     def __init__(self):
-        pass
+        self.db_engine = DB_Engine(DB_STR)
+        self.db_engine.create_table()
+
 
     def process_item(self, item, spider):
+        self.db_engine.process_item(item)
         return item

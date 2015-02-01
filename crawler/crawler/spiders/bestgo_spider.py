@@ -69,7 +69,7 @@ class BestgoSpider(CrawlSpider):
             item['code'] = code
             item['records'] = records
             item['channel'] = 'fund'
-            item['date'] = date
+            item['cdate'] = date
             yield item
 
     def parse_hd_item(self, response):
@@ -79,7 +79,7 @@ class BestgoSpider(CrawlSpider):
             item['code'] = code
             item['records'] = records
             item['channel'] = 'hd'
-            item['date'] = date
+            item['cdate'] = date
             yield item
 
 

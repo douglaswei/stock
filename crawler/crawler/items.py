@@ -85,6 +85,6 @@ class StockItem(Item):
     code = Field()
     sub_code = Field()
     cate = Field()
-    date = Field()
+    cdate = Field()
     name = Field()
     records = Field()

@@ -24,6 +24,8 @@ STOCK_DATA_DIR="../data/crawl_data/"
 
 DUMP_FILENAME="../data/dump"
 
+DB_STR = 'sqlite:///./sqlalchemy.db'
+
 FREE_PROXY_FILE = "free_proxy.txt"
 FREE_PROXY_FILE_TOUCH = "./free_proxy.txt.touch"
 

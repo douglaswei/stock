@@ -1,6 +1,6 @@
 # 1. 代理服务器
 
-任务: 获取免费代理，提供restful的借口，供爬虫使用    
+任务: 获取免费代理，提供restful的借口，供爬虫使用
 重要参数:
 > 1. proxy reuse interval
 > 2. proxy update interval
@@ -8,7 +8,7 @@
 
 # 2. 爬虫
 任务: 爬取数据
-数据源: bestgo, shdjt
+数据源: bestgo, shdjt  
 重要参数:
 > 1. seed
 > 2. regex rules

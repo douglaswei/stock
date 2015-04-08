@@ -5,6 +5,7 @@ import cn.edu.hfut.dmic.webcollector.crawler.DeepCrawler;
 import cn.edu.hfut.dmic.webcollector.model.Links;
 import cn.edu.hfut.dmic.webcollector.model.Page;
 import cn.edu.hfut.dmic.webcollector.util.RegexRule;
+import com.douglas.stock.common.Record;
 import com.douglas.stock.common.Sleeper;
 import com.douglas.stock.common.seed.SeedManager;
 import com.douglas.stock.crawler.writer.RecorderWriter;
@@ -24,6 +25,15 @@ public class CommonSpider extends DeepCrawler {
     private Map<String, BasicPageProcessor> processorHashMap;
     private Sleeper sleeper;
     private List<RecorderWriter> writerChain;
+    private boolean traceLink = false;
+
+    public boolean isTraceLink() {
+        return traceLink;
+    }
+
+    public void setTraceLink(boolean traceLink) {
+        this.traceLink = traceLink;
+    }
 
     public RegexRule getRule() {
         return rule;
@@ -110,14 +120,15 @@ public class CommonSpider extends DeepCrawler {
         for (String link : resLinks) {
             logger.debug("{} --> {}", page.getUrl(), link);
         }
-        return resLinks;
-    }
 
-    public static void main(String[] args) throws Exception {
-        CommonSpider spider = new CommonSpider("test");
-        spider.addSeed("http://www.bestgo.com/fund/");
-        spider.setThreads(1);
-        spider.start(2^10);
+        Collections.sort(resLinks);
+        if (traceLink) {
+            logger.info("[{}] get {} forward link", page.getUrl(), resLinks.size());
+            for (String link : resLinks) {
+                logger.info("trace link [{}] -> [{}]", page.getUrl(), link);
+            }
+        }
+        return resLinks;
     }
 
 }

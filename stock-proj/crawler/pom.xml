@@ -14,11 +14,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>us.codecraft</groupId>
-            <artifactId>xsoup</artifactId>
-            <version>0.3.0</version>
-        </dependency>
-        <dependency>
             <groupId>com.douglas.stock</groupId>
             <artifactId>common</artifactId>
             <version>${parent.version}</version>

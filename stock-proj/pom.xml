@@ -13,6 +13,7 @@
         <module>crawler</module>
         <module>proxyservice</module>
         <module>common</module>
+        <module>dataprepare</module>
     </modules>
 
     <properties>
@@ -24,6 +25,12 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>us.codecraft</groupId>
+            <artifactId>xsoup</artifactId>
+            <version>0.3.0</version>
+        </dependency>
+
         <dependency>
             <groupId>cn.edu.hfut.dmic.webcollector</groupId>
             <artifactId>WebCollector</artifactId>

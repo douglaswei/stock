@@ -1,7 +1,7 @@
 package com.douglas.stock.crawler.writer;
 
-import com.douglas.stock.crawler.Record;
-import com.douglas.stock.crawler.dao.DBRecordService;
+import com.douglas.stock.common.Record;
+import com.douglas.stock.common.dao.DBRecordService;
 
 import java.util.List;
 

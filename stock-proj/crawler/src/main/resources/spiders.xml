@@ -17,12 +17,13 @@
 
     <!--seed manager stuff-->
     <bean id="dateGenerator" class="com.douglas.stock.common.seed.generator.StringGeneratorDate">
-        <property name="backwardSpan" value="1200"/>
+        <property name="backwardSpan" value="800"/>
         <property name="date">
             <bean class="java.util.Date"></bean>
         </property>
         <property name="dateFormat" ref="bestgoDateFormat"/>
     </bean>
+
     <bean id="bestgoFundSeedTemplate" class="com.douglas.stock.common.seed.SeedTemplate">
         <property name="templateSeed" value="http://www.bestgo.com/fund/${template}/"></property>
         <property name="generator" ref="dateGenerator"/>
@@ -33,21 +34,29 @@
         <property name="generator" ref="dateGenerator"/>
     </bean>
 
-    <bean id="shdjtGeguSeedTemplate" class="com.douglas.stock.common.seed.SeedFromList">
-        <property name="seeds">
-            <list>
-                <value>http://www.shdjt.com/sh.htm</value>
-                <value>http://www.shdjt.com/sz.htm</value>
-                <value>http://www.shdjt.com/cy.htm</value>
-            </list>
-        </property>
+
+    <bean id="codeGenerator" class="com.douglas.stock.common.seed.generator.StringGeneratorOnline"/>
+
+    <bean id="shdjtGeguSeedTemplate" class="com.douglas.stock.common.seed.SeedTemplate">
+        <property name="templateSeed" value="http://www.shdjt.com/gpdm.asp?gpdm=${template}"/>
+        <property name="generator" ref="codeGenerator"/>
     </bean>
+
+    <!--<bean id="shdjtGeguSeedTemplate" class="com.douglas.stock.common.seed.SeedFromList">-->
+        <!--<property name="seeds">-->
+            <!--<list>-->
+                <!--<value>http://www.shdjt.com/sh.htm</value>-->
+                <!--<value>http://www.shdjt.com/sz.htm</value>-->
+                <!--<value>http://www.shdjt.com/cy.htm</value>-->
+            <!--</list>-->
+        <!--</property>-->
+    <!--</bean>-->
 
     <bean id="seedManager" class="com.douglas.stock.common.seed.SeedManager">
         <property name="seedTemplates">
             <list>
-                <!--<ref bean="bestgoFundSeedTemplate"/>-->
-                <!--<ref bean="bestgoHdSeedTemplate"/>-->
+                <ref bean="bestgoFundSeedTemplate"/>
+                <ref bean="bestgoHdSeedTemplate"/>
                 <ref bean="shdjtGeguSeedTemplate"/>
             </list>
         </property>
@@ -61,7 +70,7 @@
                 <!--bestgo pages-->
                 <value>+http://www.bestgo.com/(hd|fund)/\d{8}/([\d,]*\.html)?</value>
                 <!--shdjt sh sz cy page-->
-                <value>+http://www.shdjt.com/(sh|sz|cy).htm</value>
+                <!--<value>+http://www.shdjt.com/(sh|sz|cy).htm</value>-->
                 <!--shdjt gegu pages-->
                 <value>+http://www.shdjt.com/gpdm.asp\?(page=(\d){1,2}&amp;)?gpdm=\d{6}</value>
                 <!--exclude bk pages-->
@@ -82,21 +91,21 @@
 
 
     <!--sleepers-->
-    <bean id="sleeper" class="com.douglas.stock.common.Sleeper">
-        <property name="dftMs" value="10"/>
-        <property name="domainMsMap">
-            <map>
-                <entry key="www.shdjt.com" value="1000"/>
-            </map>
-        </property>
-    </bean>
+    <!--<bean id="sleeper" class="com.douglas.stock.common.Sleeper">-->
+        <!--<property name="dftMs" value="10"/>-->
+        <!--<property name="domainMsMap">-->
+            <!--<map>-->
+                <!--<entry key="www.shdjt.com" value="100"/>-->
+            <!--</map>-->
+        <!--</property>-->
+    <!--</bean>-->
 
 
 
     <!--db writer stuff-->
     <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
         <property name="driverClassName" value="com.mysql.jdbc.Driver"></property>
-        <property name="url" value="jdbc:mysql://10.0.34.219:3306/test?useUnicode=true&amp;characterEncoding=UTF-8&amp;zeroDateTimeBehavior=convertToNull"></property>
+        <property name="url" value="jdbc:mysql://10.0.34.219:3306/stock_data?useUnicode=true&amp;characterEncoding=UTF-8&amp;zeroDateTimeBehavior=convertToNull"></property>
         <property name="username" value="root"></property>
         <property name="password" value="111"></property>
         <property name="maxActive" value="200"></property>
@@ -106,16 +115,16 @@
     </bean>
 
     <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
-        <property name="typeAliasesPackage" value="douglas.stock.spider.dao">
+        <property name="typeAliasesPackage" value="com.douglas.stock.common.dao">
         </property>
         <property name="dataSource" ref="dataSource" />
     </bean>
 
     <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
-        <property name="basePackage" value="douglas.stock.spider.dao"></property>
+        <property name="basePackage" value="com.douglas.stock.common.dao"></property>
     </bean>
 
-    <bean id="recordService" class="com.douglas.stock.crawler.dao.DBRecordService" autowire="byType">
+    <bean id="recordService" class="com.douglas.stock.common.dao.DBRecordService" autowire="byType">
     </bean>
     <bean name="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
         <property name="dataSource" ref="dataSource"></property>
@@ -137,7 +146,7 @@
     </tx:advice>
 
     <aop:config>
-        <aop:pointcut id="pc" expression="execution(public * com.douglas.stock.crawler.dao.DBRecordDao.*(..))" /> <!--把事务控制在Service层-->
+        <aop:pointcut id="pc" expression="execution(public * com.douglas.stock.common.dao.DBRecordDao.*(..))" /> <!--把事务控制在Service层-->
         <aop:advisor pointcut-ref="pc" advice-ref="userTxAdvice" />
     </aop:config>
 
@@ -159,7 +168,7 @@
     <!--</bean>-->
 
     <bean id="proxysFromUrl" class="com.douglas.stock.proxyservice.consumer.ProxyConsumer">
-        <constructor-arg value="proxys"/>
+        <property name="requestUrl" value="http://10.0.34.219:8080/getForUse"/>
     </bean>
 
 
@@ -192,6 +201,11 @@
                 <value>"Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/535.24 (KHTML, like Gecko) Chrome/19.0.1055.1 Safari/535.24"</value>
             </list>
         </property>
+        <property name="noProxyDomains">
+            <set>
+                <value>www.bestgo.com</value>
+            </set>
+        </property>
     </bean>
 
 
@@ -202,7 +216,7 @@
         <property name="seedManager" ref="seedManager"/>
         <property name="httpRequester" ref="commonRequester"/>
 
-        <property name="retry" value="100"/>
+        <property name="retry" value="10000"/>
         <property name="threads" value="100"/>
         <property name="rule" ref="regexRule"/>
 
@@ -219,12 +233,11 @@
                 <ref bean="dbWriter"/>
             </list>
         </property>
-        <property name="sleeper" ref="sleeper"/>
+        <property name="traceLink" value="false"/>
     </bean>
 
-    <!--processer:-->
-        <!--1. seed-->
-        <!--2. processor map-->
-        <!--3. writer-->
+    <!--1. seed-->
+    <!--2. regex rule-->
+    <!--3. writer-->
 
 </beans>

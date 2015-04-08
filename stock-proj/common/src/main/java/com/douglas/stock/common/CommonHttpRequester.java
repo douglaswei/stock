@@ -15,6 +15,7 @@ import java.net.Proxy;
 import java.net.URL;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -30,6 +31,15 @@ public class CommonHttpRequester implements HttpRequester {
     private int connectTimeOut = 5000;
     private int readTimeOut = 20000;
     private int contentLengthLimit = 0;
+    private Set<String> noProxyDomains;
+
+    public Set<String> getNoProxyDomains() {
+        return noProxyDomains;
+    }
+
+    public void setNoProxyDomains(Set<String> noProxyDomains) {
+        this.noProxyDomains = noProxyDomains;
+    }
 
     public void configConnection(HttpURLConnection con) {
 
@@ -43,20 +53,27 @@ public class CommonHttpRequester implements HttpRequester {
         int code = -1;
         int maxRedirect = Math.max(0, Config.MAX_REDIRECT);
         for (int redirect = 0; redirect <= maxRedirect; redirect++) {
-            if (proxys == null) {
-                con = (HttpURLConnection) _URL.openConnection();
-            } else {
-                Proxy proxy = proxys.nextProxy();
-                if (proxy == null) {
+            String domain = new URL(url).getHost();
+            if (noProxyDomains == null || !noProxyDomains.contains(domain)) {
+                if (proxys == null) {
                     con = (HttpURLConnection) _URL.openConnection();
                 } else {
-                    con = (HttpURLConnection) _URL.openConnection(proxy);
+                    Proxy proxy = proxys.nextProxy();
+                    if (proxy == null) {
+                        con = (HttpURLConnection) _URL.openConnection();
+                    } else {
+                        con = (HttpURLConnection) _URL.openConnection(proxy);
+                    }
                 }
+            } else {
+                con = (HttpURLConnection) _URL.openConnection();
             }
             //con.setInstanceFollowRedirects(false);
             if (userAgents != null) {
-                int idx = random.nextInt(userAgents.size());
-                con.setRequestProperty("User-Agent", userAgents.get(idx));
+                synchronized (random) {
+                    int idx = random.nextInt(userAgents.size());
+                    con.setRequestProperty("User-Agent", userAgents.get(idx));
+                }
             }
             if (cookie != null) {
                 con.setRequestProperty("Cookie", cookie);

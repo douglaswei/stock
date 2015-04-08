@@ -1,7 +1,7 @@
 package com.douglas.stock.crawler.pageprocess.shdjt;
 
 import cn.edu.hfut.dmic.webcollector.model.Page;
-import com.douglas.stock.crawler.Record;
+import com.douglas.stock.common.Record;
 import com.douglas.stock.common.TextProcess;
 import com.douglas.stock.crawler.pageprocess.BasicPageProcessor;
 import org.apache.commons.lang3.StringUtils;

@@ -1,4 +1,4 @@
-package douglas.proxy.extract;
+package com.douglas.stock.proxyservice.extract;
 
 import cn.edu.hfut.dmic.webcollector.net.HttpResponse;
 import com.douglas.stock.proxyservice.extract.BaseExtractor;

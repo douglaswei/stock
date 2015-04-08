@@ -42,7 +42,7 @@ public class PageCrawler {
         CommonHttpRequester requester = new CommonHttpRequester();
         requester.setConnectTimeOut(connectTimeout);
         requester.setReadTimeOut(readTimeout);
-        //requester.setCookie("visid_incap_257263=hZZ3rUrvR/KT2aNAKs1ZjenToFQAAAAAQUIPAAAAAACG3nnf+LUrto9yxcfpc0X0; incap_ses_199_257263=N1o/ZjuMQW0XAs8DUx7DAunToFQAAAAABioeTfdjm85Vqxm+me0aXA==");
+        requester.setCookie("visid_incap_257263=hZZ3rUrvR/KT2aNAKs1ZjenToFQAAAAAQUIPAAAAAACG3nnf+LUrto9yxcfpc0X0; incap_ses_199_257263=N1o/ZjuMQW0XAs8DUx7DAunToFQAAAAABioeTfdjm85Vqxm+me0aXA==");
 
         if (agents != null && agents.size() != 0) {
             requester.setUserAgents(agents);

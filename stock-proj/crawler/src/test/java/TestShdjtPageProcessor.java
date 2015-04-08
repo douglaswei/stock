@@ -1,4 +1,4 @@
-import com.douglas.stock.crawler.Record;
+import com.douglas.stock.common.Record;
 import com.douglas.stock.crawler.pageprocess.shdjt.GeguPageProcess;
 
 import java.util.List;

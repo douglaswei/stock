@@ -37,6 +37,8 @@ public class ProxyProviderHandler {
         }
     }
 
+
+
     public ProxyProviderHandler() {
         Producer producer = new Producer();
         producer.start();
@@ -46,6 +48,9 @@ public class ProxyProviderHandler {
     @RequestMapping("/getForUse")
     String getForUse() {
         EnhancedProxy proxy = proxyGenerator.getForUse();
+        if (proxy == null) {
+            return "";
+        }
         return proxy.type().toString() + proxy.address().toString() ;
     }
 

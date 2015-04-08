@@ -12,29 +12,36 @@ import java.net.Proxy;
  * Created by wgz on 15/4/2.
  */
 public class ProxyConsumer extends Proxys{
-    private static String localUrl = "http://localhost:8080/getForUse";
+    private String requestUrl = "http://localhost:8080/getForUse";
+    private CommonHttpRequester requester = new CommonHttpRequester();
 
+    public String getRequestUrl() {
+        return requestUrl;
+    }
+
+    public void setRequestUrl(String requestUrl) {
+        this.requestUrl = requestUrl;
+    }
 
     public Proxy nextProxy() {
         return getProxy();
     }
 
     public Proxy getProxy() {
-        return getProxy(localUrl);
+        return getProxy(requestUrl);
     }
 
-    public Proxy getProxy(String url) {
+    public synchronized Proxy getProxy(String url) {
         if (url == null) {
             return null;
         }
-        CommonHttpRequester requester = new CommonHttpRequester();
         HttpResponse response = null;
         try {
             response = requester.getResponse(url);
         } catch (Exception e) {
             return null;
         }
-        if (response == null) {
+        if (response == null || response.getContent().length == 0) {
             return null;
         }
         String content = new String(response.getContent());

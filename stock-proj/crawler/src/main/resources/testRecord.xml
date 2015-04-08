@@ -24,7 +24,7 @@
         <property name="basePackage" value="douglas.stock.spider.dao"></property>
     </bean>
 
-    <bean id="recordService" class="com.douglas.stock.crawler.dao.DBRecordService" autowire="byType">
+    <bean id="recordService" class="com.douglas.stock.common.dao.DBRecordService" autowire="byType">
     </bean>
 
 </beans>

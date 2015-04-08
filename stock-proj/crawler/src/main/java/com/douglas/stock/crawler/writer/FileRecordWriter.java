@@ -1,6 +1,6 @@
 package com.douglas.stock.crawler.writer;
 
-import com.douglas.stock.crawler.Record;
+import com.douglas.stock.common.Record;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

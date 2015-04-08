@@ -6,9 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.net.Proxy;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 
@@ -30,10 +28,12 @@ public class ProxyGenerator {
     private Chain producerChain;
     private int consumerNum = 100;
     private BlockingDeque<EnhancedProxy> proxiesQueue;
-    private List<EnhancedProxy> proxyRes;
+    private Set<EnhancedProxy> proxyRes;
+    private List<EnhancedProxy> proxyList;
     private int connectTimeout = 3000;
     private int readTimeout = 5000;
     private int validInterval = 5000;
+    private int proxyReuseInterval = 5000;
 
     public Chain getProducerChain() {
         return producerChain;
@@ -59,12 +59,20 @@ public class ProxyGenerator {
         this.proxiesQueue = proxiesQueue;
     }
 
-    public List<EnhancedProxy> getProxyRes() {
+    public Set<EnhancedProxy> getProxyRes() {
         return proxyRes;
     }
 
-    public void setProxyRes(List<EnhancedProxy> proxyRes) {
+    public void setProxyRes(Set<EnhancedProxy> proxyRes) {
         this.proxyRes = proxyRes;
+    }
+
+    public List<EnhancedProxy> getProxyList() {
+        return proxyList;
+    }
+
+    public void setProxyList(List<EnhancedProxy> proxyList) {
+        this.proxyList = proxyList;
     }
 
     public int getConnectTimeout() {
@@ -91,6 +99,14 @@ public class ProxyGenerator {
         this.validInterval = validInterval;
     }
 
+    public int getProxyReuseInterval() {
+        return proxyReuseInterval;
+    }
+
+    public void setProxyReuseInterval(int proxyReuseInterval) {
+        this.proxyReuseInterval = proxyReuseInterval;
+    }
+
     private class Consuemer extends Thread {
         public void run() {
             while (true) {
@@ -101,7 +117,6 @@ public class ProxyGenerator {
                     }
                     int interval = ProxyValidater.validate(proxy, connectTimeout, readTimeout, validInterval);
                     if (interval >= 0) {
-                        proxy.setRespondIntervalMs(interval);
                         synchronized (proxyRes) {
                             if (proxyRes != null) {
                                 proxyRes.add(proxy);
@@ -118,7 +133,7 @@ public class ProxyGenerator {
 
     public void run() throws InterruptedException {
         BlockingDeque<EnhancedProxy> newProxyQueue = new LinkedBlockingDeque<EnhancedProxy>();
-        List<EnhancedProxy> newProxyRes = new ArrayList<EnhancedProxy>();
+        Set<EnhancedProxy> newProxyRes = new HashSet<>();
         proxiesQueue = newProxyQueue;
         proxyRes = newProxyRes;
 
@@ -142,30 +157,54 @@ public class ProxyGenerator {
         EnhancedProxy endProxy = new EnhancedProxy(Proxy.Type.HTTP, new InetSocketAddress("127.0.0.1", 0), 0);
         endProxy.setValid(false);
         for (int idx = 0; idx < consumerNum; ++idx) {
-            proxiesQueue.add(endProxy);
+            proxiesQueue.put(endProxy);
         }
 
         for (Consuemer consuemer : consuemers) {
             consuemer.join();
         }
-        logger.info("finish try all proxies");
+        setProxyList(new ArrayList<EnhancedProxy>(proxyRes));
+        logger.info("finish try all proxies, final: [{}]", proxyRes.size());
     }
 
     public EnhancedProxy getForUse() {
-        List<EnhancedProxy> proxies = getProxyRes();
+        List<EnhancedProxy> proxies = getProxyList();
         int idx = 0;
         while (true) {
+            if (proxies.size() == 0) {
+                return null;
+            }
             synchronized (random) {
                 idx = random.nextInt(proxies.size());
+                logger.info("try {} proxy", idx);
             }
             synchronized (proxies) {
                 while (true) {
                     EnhancedProxy proxy = proxies.get(idx);
-                    if (proxy.useIfUsable()) {
+                    if (isProxyUsable(proxy)) {
                         return proxy;
+                    }
+
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        return null;
                     }
                 }
             }
+        }
+    }
+
+    private boolean isProxyUsable(EnhancedProxy proxy) {
+        synchronized (proxy) {
+            Date last = proxy.getLast();
+            Date now = new Date();
+            if (proxy.getLast() == null || now.getTime() - proxy.getLast().getTime() >= getProxyReuseInterval()) {
+                last = now;
+                proxy.setLast(now);
+                return true;
+            }
+            return false;
         }
     }
 }

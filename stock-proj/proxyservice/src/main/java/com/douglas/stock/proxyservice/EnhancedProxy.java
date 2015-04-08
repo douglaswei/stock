@@ -10,7 +10,6 @@ import java.util.Date;
 public class EnhancedProxy extends Proxy {
     private float respondIntervalMs;
     private Date last = null;
-    private static int reuseInterval = 5000;
     private boolean valid = true;
 
     /**
@@ -31,21 +30,12 @@ public class EnhancedProxy extends Proxy {
         respondIntervalMs = intreval;
     }
 
-    public static int getReuseInterval() {
-        return reuseInterval;
+    public Date getLast() {
+        return last;
     }
 
-    public static void setReuseInterval(int reuseInterval) {
-        EnhancedProxy.reuseInterval = reuseInterval;
-    }
-
-    public synchronized boolean useIfUsable() {
-        Date now = new Date();
-        if (last == null || now.getTime() - last.getTime() >= reuseInterval) {
-            last = now;
-            return true;
-        }
-        return false;
+    public void setLast(Date last) {
+        this.last = last;
     }
 
     public boolean isValid() {
@@ -63,6 +53,5 @@ public class EnhancedProxy extends Proxy {
     public void setRespondIntervalMs(float respondIntervalMs) {
         this.respondIntervalMs = respondIntervalMs;
     }
-
 
 }

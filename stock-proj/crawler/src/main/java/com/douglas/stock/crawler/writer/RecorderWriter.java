@@ -1,6 +1,6 @@
 package com.douglas.stock.crawler.writer;
 
-import com.douglas.stock.crawler.Record;
+import com.douglas.stock.common.Record;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;

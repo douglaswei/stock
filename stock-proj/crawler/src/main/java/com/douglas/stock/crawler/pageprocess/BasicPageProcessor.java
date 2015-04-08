@@ -1,7 +1,7 @@
 package com.douglas.stock.crawler.pageprocess;
 
 import cn.edu.hfut.dmic.webcollector.model.Page;
-import com.douglas.stock.crawler.Record;
+import com.douglas.stock.common.Record;
 
 import java.util.List;
 

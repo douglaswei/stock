@@ -1,7 +1,7 @@
 package com.douglas.stock.proxyservice.extract;
 
 import cn.edu.hfut.dmic.webcollector.net.HttpResponse;
-import com.douglas.stock.proxyservice.extract.PageCrawler;
+import com.douglas.stock.common.PageCrawler;
 
 import java.net.Proxy;
 import java.util.Date;

@@ -1,4 +1,4 @@
-package com.douglas.stock.proxyservice.extract;
+package com.douglas.stock.common;
 
 import cn.edu.hfut.dmic.webcollector.net.HttpResponse;
 import cn.edu.hfut.dmic.webcollector.net.Proxys;

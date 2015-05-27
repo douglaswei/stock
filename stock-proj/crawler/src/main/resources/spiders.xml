@@ -17,7 +17,7 @@
 
     <!--seed manager stuff-->
     <bean id="dateGenerator" class="com.douglas.stock.common.seed.generator.StringGeneratorDate">
-        <property name="backwardSpan" value="800"/>
+        <property name="backwardSpan" value="1600"/>
         <property name="date">
             <bean class="java.util.Date"></bean>
         </property>

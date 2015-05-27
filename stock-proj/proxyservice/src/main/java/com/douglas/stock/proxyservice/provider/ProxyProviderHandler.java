@@ -21,7 +21,7 @@ import java.util.Random;
 @EnableAutoConfiguration
 public class ProxyProviderHandler {
     private static ProxyGenerator proxyGenerator = ProxyGenerator.getInstance();
-    private long refreshInterval = 12 * 60 * 60 * 1000;
+    private long updateInterval = 12 * 60 * 60 * 1000;
     private static Random random = new Random();
 
     class Producer extends Thread {
@@ -29,7 +29,7 @@ public class ProxyProviderHandler {
             while (true) {
                 try {
                     proxyGenerator.run();
-                    Thread.sleep(refreshInterval);
+                    Thread.sleep(updateInterval);
                 } catch (InterruptedException e) {
                     return;
                 }

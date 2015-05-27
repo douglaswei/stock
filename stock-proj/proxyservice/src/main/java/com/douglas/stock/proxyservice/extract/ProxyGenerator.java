@@ -33,7 +33,7 @@ public class ProxyGenerator {
     private int connectTimeout = 3000;
     private int readTimeout = 5000;
     private int validInterval = 5000;
-    private int proxyReuseInterval = 5000;
+    private int proxyReuseInterval = 4000;
 
     public Chain getProducerChain() {
         return producerChain;

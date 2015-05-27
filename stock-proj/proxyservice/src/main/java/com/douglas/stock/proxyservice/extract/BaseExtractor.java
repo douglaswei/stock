@@ -4,6 +4,7 @@ import cn.edu.hfut.dmic.webcollector.model.Links;
 import cn.edu.hfut.dmic.webcollector.model.Page;
 import cn.edu.hfut.dmic.webcollector.net.HttpResponse;
 import cn.edu.hfut.dmic.webcollector.util.RegexRule;
+import com.douglas.stock.common.PageCrawler;
 
 import java.util.List;
 

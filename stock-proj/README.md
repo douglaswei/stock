@@ -6,6 +6,10 @@
 > 2. proxy update interval
 > 3. proxy sources
 
+todo:  
+> 1. 代理不够多
+
+
 # 2. 爬虫
 任务: 爬取数据  
 数据源: bestgo, shdjt  

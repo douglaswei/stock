@@ -105,7 +105,23 @@ public class BasicExtractor implements ExtractorInterface {
         putOriginFeat(begRecord, rawFeatures, "peRatio");
         putOriginFeat(begRecord, rawFeatures, "pePs");
 
-        rawFeatures.put("diff_minus_eda", begRecord.getDiff() - begRecord.getDea());
+        //
+        putOriginFeatPM(begRecord, rawFeatures, "ddx");
+        putOriginFeatPM(begRecord, rawFeatures, "bbd");
+        putOriginFeatPM(begRecord, rawFeatures, "diffActionXBig");
+        putOriginFeatPM(begRecord, rawFeatures, "diffActionBig");
+        putOriginFeatPM(begRecord, rawFeatures, "diffActionMid");
+        putOriginFeatPM(begRecord, rawFeatures, "diffActionPercentSmall");
+        putOriginFeatPM(begRecord, rawFeatures, "activity");
+        putOriginFeatPM(begRecord, rawFeatures, "volRatio");
+        putOriginFeatPM(begRecord, rawFeatures, "ddx5");
+        putOriginFeatPM(begRecord, rawFeatures, "ddy5");
+        putOriginFeatPM(begRecord, rawFeatures, "ddx60");
+        putOriginFeatPM(begRecord, rawFeatures, "ddy60");
+        putOriginFeatGradient(begRecord, rawFeatures, "inPercentXLarge", "outPercentXLarge");
+        putOriginFeatGradient(begRecord, rawFeatures, "inPercentLarge", "outPercentLarge");
+        putOriginFeatGradient(begRecord, rawFeatures, "diff", "eda");
+        putOriginFeatGradient(begRecord, rawFeatures, "diff", "eda");
 
         float ma1 = getAvg(records, 0, 1, "maFuquan");
         float ma3 = getAvg(records, 0, 3, "maFuquan");
@@ -139,9 +155,9 @@ public class BasicExtractor implements ExtractorInterface {
         float macd10 = getAvg(records, 0, 10, "macd");
 
 
-        float jinLiuru1 = getAvg(records, 0, 1, "jinLiuru");
-        float jinLiuru3 = getAvg(records, 0, 3, "jinLiuru");
-        float jinLiuru5 = getAvg(records, 0, 5, "jinLiuru");
+        float jinLiuRu1 = getAvg(records, 0, 1, "jinLiuru");
+        float jinLiuRu3 = getAvg(records, 0, 3, "jinLiuru");
+        float jinLiuRu5 = getAvg(records, 0, 5, "jinLiuru");
 
         float hdJingLiang1 = getAvg(records, 0, 1, "hdJingLiang");
         float hdJingLiang3 = getAvg(records, 0, 3, "hdJingLiang");
@@ -190,9 +206,9 @@ public class BasicExtractor implements ExtractorInterface {
         rawFeatures.put("macd_3_5_grandient", gradient(macd1, macd5));
         rawFeatures.put("macd_5_10_grandient", gradient(macd1, macd10));
 
-        rawFeatures.put("jinLiuru_1_3_grandient", gradient(jinLiuru1, jinLiuru3));
-        rawFeatures.put("jinLiuru_1_5_grandient", gradient(jinLiuru1, jinLiuru5));
-        rawFeatures.put("jinLiuru_3_5_grandient", gradient(jinLiuru3, jinLiuru5));
+        rawFeatures.put("jinLiuru_1_3_grandient", gradient(jinLiuRu1, jinLiuRu3));
+        rawFeatures.put("jinLiuru_1_5_grandient", gradient(jinLiuRu1, jinLiuRu5));
+        rawFeatures.put("jinLiuru_3_5_grandient", gradient(jinLiuRu3, jinLiuRu5));
 
         rawFeatures.put("hdJingLiang_1_3_grandient", gradient(hdJingLiang1, hdJingLiang3));
         rawFeatures.put("hdJingLiang_1_5_grandient", gradient(hdJingLiang1, hdJingLiang5));
@@ -201,18 +217,39 @@ public class BasicExtractor implements ExtractorInterface {
         // 强特征
         rawFeatures.put("pm_1_3_ma", ma1 > ma3 ? 1: 0);
         rawFeatures.put("pm_3_5_ma", ma3 > ma5 ? 1: 0);
+
         rawFeatures.put("pm_1_3_hsl", hsl1 > hsl3 ? 1: 0);
         rawFeatures.put("pm_3_5_hsl", hsl3 > hsl5 ? 1: 0);
+
         rawFeatures.put("pm_1_3_diff", diff1 > diff3 ? 1: 0);
         rawFeatures.put("pm_3_5_diff", diff3 > diff5 ? 1: 0);
+        rawFeatures.put("pm_diff1", diff1 > 0 ? 1: 0);
+        rawFeatures.put("pm_diff3", diff3 > 0 ? 1: 0);
+        rawFeatures.put("pm_diff5", diff5 > 0 ? 1: 0);
+
         rawFeatures.put("pm_1_3_dea", dea1 > dea3 ? 1: 0);
         rawFeatures.put("pm_3_5_dea", dea3 > dea5 ? 1: 0);
+        rawFeatures.put("pm_dea1", dea1 > 0 ? 1: 0);
+        rawFeatures.put("pm_dea3", dea3 > 0 ? 1: 0);
+        rawFeatures.put("pm_dea5", dea5 > 0 ? 1: 0);
+
         rawFeatures.put("pm_1_3_macd", macd1 > macd3 ? 1: 0);
         rawFeatures.put("pm_3_5_macd", macd3 > macd5 ? 1: 0);
-        rawFeatures.put("pm_1_3_jinLiuRu", jinLiuru1 > jinLiuru3 ? 1: 0);
-        rawFeatures.put("pm_3_5_jinLiuRu", jinLiuru3 > jinLiuru5 ? 1: 0);
+        rawFeatures.put("pm_macd1", macd1 > 0 ? 1: 0);
+        rawFeatures.put("pm_macd3", macd3 > 0 ? 1: 0);
+        rawFeatures.put("pm_macd5", macd5 > 0 ? 1: 0);
+
+        rawFeatures.put("pm_1_3_jinLiuRu", jinLiuRu1 > jinLiuRu3 ? 1: 0);
+        rawFeatures.put("pm_3_5_jinLiuRu", jinLiuRu3 > jinLiuRu5 ? 1: 0);
+        rawFeatures.put("pm_jinLiuRu1", jinLiuRu1 > 0 ? 1: 0);
+        rawFeatures.put("pm_jinLiuRu3", jinLiuRu3 > 0 ? 1: 0);
+        rawFeatures.put("pm_jinLiuRu5", jinLiuRu5 > 0 ? 1: 0);
+
         rawFeatures.put("pm_1_3_hdJingLiang", hdJingLiang1 > hdJingLiang3 ? 1: 0);
         rawFeatures.put("pm_3_5_hdJingLiang", hdJingLiang3 > hdJingLiang5 ? 1: 0);
+        rawFeatures.put("pm_hdJingLiang1", hdJingLiang1 > 0 ? 1: 0);
+        rawFeatures.put("pm_hdJingLiang3", hdJingLiang3 > 0 ? 1: 0);
+        rawFeatures.put("pm_hdJingLiang5", hdJingLiang5 > 0 ? 1: 0);
 
     }
 
@@ -248,6 +285,22 @@ public class BasicExtractor implements ExtractorInterface {
             return;
         }
         rawFeatures.put(name, getValueByName(record, name));
+    }
+
+    private void putOriginFeatPM(DBRecord record, RawFeatures rawFeatures, String name) {
+        if (record == null || rawFeatures == null) {
+            return;
+        }
+        rawFeatures.put("pm_" + name, getValueByName(record, name) > 0 ? 1 : 0);
+    }
+
+    private void putOriginFeatGradient(DBRecord record, RawFeatures rawFeatures, String name1, String name2) {
+        if (record == null || rawFeatures == null) {
+            return;
+        }
+        float grad = gradient(getValueByName(record, name1), getValueByName(record, name2));
+        rawFeatures.put("diff_pm_" + name1 + "_" + name2, grad);
+        rawFeatures.put("diff_pm_gradient_" + name1 + "_" + name2, grad > 0 ? 1 : 0);
     }
 
     private float getAvg(List<DBRecord> records, int beg, int len, String name) {

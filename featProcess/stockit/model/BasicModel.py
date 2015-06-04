@@ -1,6 +1,7 @@
 __author__ = 'wgz'
 
 import numpy as np
+
 from ..Common import load_data
 
 
@@ -32,5 +33,6 @@ class BasicModel:
         # return predict res
         pass
 
-    def save_result(self, train_raw_feats, train_feats, train_labels, train_res, predict_raw_feats, predict_feats, predict_res, output_fname):
+    def save_result(self, train_raw_feats, train_feats, train_labels, train_res, predict_raw_feats, predict_feats,
+                    predict_res, output_fname):
         pass

@@ -1,7 +1,6 @@
 __author__ = 'wgz'
 
 import numpy as np
-import sklearn as sk
 from sklearn.cluster import KMeans
 
 
@@ -31,11 +30,12 @@ class Knn:
         cluster_res = model.predict(features)
         distances = model.transform(features)
         cluster_idx_array = [
-                [idx for idx in range(len(cluster_res)) if cluster_res[idx] == cluster]
-                for cluster in set(cluster_res)]
+            [idx for idx in range(len(cluster_res)) if cluster_res[idx] == cluster]
+            for cluster in set(cluster_res)]
         cluster_avgDist_array = [
-                np.mean(np.asarray([distances[idx][cluster] for idx in range(len(cluster_res)) if cluster_res[idx] == cluster]))
-                for cluster in set(cluster_res)]
+            np.mean(
+                np.asarray([distances[idx][cluster] for idx in range(len(cluster_res)) if cluster_res[idx] == cluster]))
+            for cluster in set(cluster_res)]
         return cluster_idx_array, cluster_avgDist_array
 
 

@@ -1,11 +1,12 @@
 # encoding=utf-8
 import gc
+
 from stockit.Common import exec_cmd
+
 
 __author__ = 'wgz'
 
 import commands
-import sys
 from random import Random
 from ..FeatManager import FeatManager
 
@@ -92,7 +93,8 @@ class LR():
         self.set_params(11, 20, work_path)
 
         # feature 离散化处理
-        FeatManager().extract_discrete_feat(raw_feature_path, self.feature_raw_train_path, self.feature_raw_predict_path, 3, 500)
+        FeatManager().extract_discrete_feat(raw_feature_path, self.feature_raw_train_path,
+                                            self.feature_raw_predict_path, 3, 500)
         gc.collect()
         print('finish extract feats')
 
@@ -142,14 +144,14 @@ class LR():
             line = f_raw_feat.readline()
             if line == None or len(line) == 0:
                 break
-            fields = ['_'.join(line[:-1].split('\t')[1:3]),]
+            fields = ['_'.join(line[:-1].split('\t')[1:3]), ]
 
             line = f_predict_res.readline()
             predict_label = line[:-1]
             fields.append(predict_label)
             res.append(fields)
 
-        for fields in sorted(res, key=lambda x:float(x[1]), reverse=True):
+        for fields in sorted(res, key=lambda x: float(x[1]), reverse=True):
             fout.write('\t'.join(fields) + '\n')
 
         fout.close()

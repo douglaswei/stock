@@ -1,5 +1,3 @@
-import gc
-
 __author__ = 'wgz'
 
 import sys
@@ -56,16 +54,18 @@ class FeatManager:
         self.set_train_predict_path(feat_train_path, feat_predict_path)
         feature_max_values, feature_min_values = self.extract_maxs_mins(raw_feat_path, feat_beg_idx)
         feature_diffs = map(lambda x: x[0] - x[1], zip(feature_max_values, feature_min_values))
-        feature_spans = map(lambda x: x/span_num or 0.1, feature_diffs)
+        feature_spans = map(lambda x: x / span_num or 0.1, feature_diffs)
         translator = FeatTranslator()
 
         for line in open(raw_feat_path):
             kvs = [item.split(':') for item in line[:-1].split('\t')]
             raw_feature_map = dict(kvs)
-            label, code, date = raw_feature_map.get(labelName), raw_feature_map.get(codeName), raw_feature_map.get(dateName)
-            label_res = 0 if (len(label) == 0 or float(label) <= 0) else float(float(label)/30)
+            label, code, date = raw_feature_map.get(labelName), raw_feature_map.get(codeName), raw_feature_map.get(
+                dateName)
+            label_res = 0 if (len(label) == 0 or float(label) <= 0) else float(float(label) / 30)
 
-            feature_map = dict(map(lambda (v, s, m): [v[0], (float(v[1])-m)/s], zip(kvs[feat_beg_idx:], feature_spans, feature_min_values)))
+            feature_map = dict(map(lambda (v, s, m): [v[0], (float(v[1]) - m) / s],
+                                   zip(kvs[feat_beg_idx:], feature_spans, feature_min_values)))
             feature_res_map = translator.extract(feature_map, True)
             out_str = "%s:%f\t%s:%s\t%s:%s" % (labelName, label_res, codeName, code, dateName, date)
 

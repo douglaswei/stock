@@ -1,7 +1,10 @@
 import gc
+
 from sklearn.tree import DecisionTreeClassifier, export_graphviz
-from stockit.FeatManager import FeatManager
 import numpy as np
+
+from stockit.FeatManager import FeatManager
+
 
 __author__ = 'wgz'
 
@@ -28,7 +31,7 @@ class DT():
             fields = line[:-1].split('\t')
             features.append([float(field.split(':')[1]) for field in fields[3:]])
             labels.append(0 if float(fields[0].split(':')[1]) == 0 else 1)
-            descriptions.append(['_'.join(fields[1:3]),])
+            descriptions.append(['_'.join(fields[1:3]), ])
 
         return np.asarray(features), labels, descriptions
 
@@ -37,7 +40,7 @@ class DT():
         fout = open(self.predict_result_path, 'w')
         for desc, label in zip(descriptions, predict_res):
             desc.append(str(label))
-        for desc in sorted(descriptions, key=lambda x:float(x[1]), reverse=True):
+        for desc in sorted(descriptions, key=lambda x: float(x[1]), reverse=True):
             fout.write('\t'.join(desc) + '\n')
         fout.close()
 

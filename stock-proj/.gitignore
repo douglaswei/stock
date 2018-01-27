@@ -1,0 +1,53 @@
+#ignore target under current directory and all subdirectories:
+target/
+*/target/
+test-output/
+*/test-output/
+
+#ignore pull.bat and push bat
+pull.bat
+push.bat
+
+#ignore settings & gitignore file
+.settings/
+*/.settings/
+.springBeans
+*/.springBeans
+
+#ignore node_modules files
+node_modules
+
+#ignore svn files
+.svn
+*/.svn
+
+.project
+
+.metadata
+
+*/.project
+
+.classpath
+*/.classpath
+
+.data/
+*/.data/
+*~
+
+.idea/
+*.iml
+
+#logs
+*/*/logs/
+/build/
+#ignore 更新代码.bat
+更新代码.bat
+
+f2e/
+.DS_Store
+
+src/main/java/com/lianshang/website/f2e/
+src/main/resources/config/f2e/
+dispatcher-servlet.f2e.xml
+
+.DS_Store

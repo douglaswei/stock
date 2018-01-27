@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+     http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+     http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+     http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.0.xsd
+     http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+     http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
+
+    <!--db stuff-->
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver"></property>
+        <property name="url" value="jdbc:mysql://10.0.128.115:3306/test?useUnicode=true&amp;characterEncoding=UTF-8&amp;zeroDateTimeBehavior=convertToNull"></property>
+        <property name="username" value="robot_bi"></property>
+        <property name="password" value="robot_bi_test"></property>
+        <property name="maxActive" value="200"></property>
+        <property name="maxIdle" value="30"></property>
+        <property name="maxWait" value="500"></property>
+        <property name="defaultAutoCommit" value="true"></property>
+    </bean>
+
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="typeAliasesPackage" value="com.douglas.stock.common.dao">
+        </property>
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.douglas.stock.common.dao"></property>
+    </bean>
+
+    <bean id="recordService" class="com.douglas.stock.common.dao.DBRecordService" autowire="byType">
+    </bean>
+    <bean name="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+
+    <tx:advice id="userTxAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="delete*" propagation="REQUIRED" read-only="false"
+                       rollback-for="java.lang.Exception" no-rollback-for="java.lang.RuntimeException"/>
+            <tx:method name="insert*" propagation="REQUIRED" read-only="false"
+                       rollback-for="java.lang.RuntimeException" />
+            <tx:method name="update*" propagation="REQUIRED" read-only="false"
+                       rollback-for="java.lang.Exception" />
+
+            <tx:method name="find*" propagation="SUPPORTS"/>
+            <tx:method name="get*" propagation="SUPPORTS"/>
+            <tx:method name="select*" propagation="SUPPORTS"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <aop:config>
+        <aop:pointcut id="pc" expression="execution(public * com.douglas.stock.common.dao.DBRecordDao.*(..))" /> <!--把事务控制在Service层-->
+        <aop:advisor pointcut-ref="pc" advice-ref="userTxAdvice" />
+    </aop:config>
+
+
+    <!--job defination-->
+    <bean id="codeGenerator" class="com.douglas.stock.common.job.BasicJob">
+        <property name="threadNum" value="1"/>
+        <property name="processorClassName" value="com.douglas.stock.dataprepare.job.processor.T_Code"/>
+    </bean>
+
+    <bean id="removeInvalid" class="com.douglas.stock.common.job.BasicJob">
+        <property name="threadNum" value="20"/>
+        <property name="processorClassName" value="com.douglas.stock.dataprepare.job.processor.F_Code_T_Code_RemoveInvalidRecord"/>
+    </bean>
+
+    <bean id="execFeatures" class="com.douglas.stock.common.job.BasicJob">
+        <property name="threadNum" value="20"/>
+        <property name="processorClassName" value="com.douglas.stock.dataprepare.job.processor.F_Code_T_RawFeatures"/>
+    </bean>
+
+    <bean id="jobManager" class="com.douglas.stock.dataprepare.job.JobManager">
+        <property name="jobLists">
+            <list>
+                <ref bean="codeGenerator"/>
+                <ref bean="removeInvalid"/>
+                <ref bean="execFeatures"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="featFileName" class="java.lang.String">
+        <constructor-arg value="feats"/>
+    </bean>
+
+    <bean id="labelThresholdUpper" class="java.lang.Float">
+        <constructor-arg value="10"/>
+    </bean>
+
+    <bean id="labelThresholdLower" class="java.lang.Float">
+        <constructor-arg value="-5"/>
+    </bean>
+
+</beans>

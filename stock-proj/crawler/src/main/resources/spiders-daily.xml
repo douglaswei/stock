@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+     http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+     http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+     http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.0.xsd
+     http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+     http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
+
+    <!--date formater-->
+    <bean id="bestgoDateFormat" class="java.text.SimpleDateFormat">
+        <constructor-arg value="yyyyMMdd"/>
+    </bean>
+
+    <!--seed manager stuff-->
+    <bean id="dateGenerator" class="com.douglas.stock.common.seed.generator.StringGeneratorDate">
+        <property name="backwardSpan" value="2"/>
+        <property name="date">
+            <bean class="java.util.Date"></bean>
+        </property>
+        <property name="dateFormat" ref="bestgoDateFormat"/>
+    </bean>
+
+    <bean id="bestgoFundSeedTemplate" class="com.douglas.stock.common.seed.SeedTemplate">
+        <property name="templateSeed" value="http://www.bestgo.com/fund/${template}/"></property>
+        <property name="generator" ref="dateGenerator"/>
+    </bean>
+
+    <bean id="bestgoHdSeedTemplate" class="com.douglas.stock.common.seed.SeedTemplate">
+        <property name="templateSeed" value="http://www.bestgo.com/hd/${template}/"></property>
+        <property name="generator" ref="dateGenerator"/>
+    </bean>
+
+
+    <bean id="codeGenerator" class="com.douglas.stock.common.seed.generator.StringGeneratorOnline"/>
+
+    <bean id="shdjtGeguSeedTemplate" class="com.douglas.stock.common.seed.SeedTemplate">
+        <property name="templateSeed" value="http://www.shdjt.com/gpdm.asp?gpdm=${template}"/>
+        <property name="generator" ref="codeGenerator"/>
+    </bean>
+
+    <!--<bean id="shdjtGeguSeedTemplate" class="com.douglas.stock.common.seed.SeedFromList">-->
+    <!--<property name="seeds">-->
+    <!--<list>-->
+    <!--<value>http://www.shdjt.com/sh.htm</value>-->
+    <!--<value>http://www.shdjt.com/sz.htm</value>-->
+    <!--<value>http://www.shdjt.com/cy.htm</value>-->
+    <!--</list>-->
+    <!--</property>-->
+    <!--</bean>-->
+
+    <bean id="seedManager" class="com.douglas.stock.common.seed.SeedManager">
+        <property name="seedTemplates">
+            <list>
+                <ref bean="bestgoFundSeedTemplate"/>
+                <ref bean="bestgoHdSeedTemplate"/>
+                <ref bean="shdjtGeguSeedTemplate"/>
+            </list>
+        </property>
+    </bean>
+
+
+    <!--regex rules (+ for include, - for exclude)-->
+    <bean id="regexRule" class="cn.edu.hfut.dmic.webcollector.util.RegexRule">
+        <constructor-arg>
+            <list>
+                <!--bestgo pages-->
+                <value>+http://www.bestgo.com/(hd|fund)/\d{8}/([\d,]*\.html)?</value>
+                <!--shdjt sh sz cy page-->
+                <!--<value>+http://www.shdjt.com/(sh|sz|cy).htm</value>-->
+                <!--shdjt gegu pages-->
+                <value>+http://www.shdjt.com/gpdm.asp\?gpdm=\d{6}</value>
+                <!--exclude bk pages-->
+                <value>-http://www.shdjt.com/gpdm.asp\?.*gpdm=9\d{5}</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+
+
+    <!--page processors-->
+    <bean id="bestgoProcessor" class="com.douglas.stock.com.douglas.stock.crawler.pageprocess.Bestgo.PageProcessor">
+        <property name="dateFormat" ref="bestgoDateFormat"/>
+    </bean>
+    <bean id="shdjtGeguProcessor" class="com.douglas.stock.com.douglas.stock.crawler.pageprocess.shdjt.GeguPageProcess">
+    </bean>
+
+
+
+    <!--sleepers-->
+    <!--<bean id="sleeper" class="com.douglas.stock.common.Sleeper">-->
+    <!--<property name="dftMs" value="10"/>-->
+    <!--<property name="domainMsMap">-->
+    <!--<map>-->
+    <!--<entry key="www.shdjt.com" value="100"/>-->
+    <!--</map>-->
+    <!--</property>-->
+    <!--</bean>-->
+
+
+
+    <!--db writer stuff-->
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver"></property>
+        <property name="url" value="jdbc:mysql://10.0.128.115:3306/test?useUnicode=true&amp;characterEncoding=UTF-8&amp;zeroDateTimeBehavior=convertToNull"></property>
+        <property name="username" value="robot_bi"></property>
+        <property name="password" value="robot_bi_test"></property>
+        <property name="maxActive" value="200"></property>
+        <property name="maxIdle" value="30"></property>
+        <property name="maxWait" value="500"></property>
+        <property name="defaultAutoCommit" value="true"></property>
+    </bean>
+
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="typeAliasesPackage" value="com.douglas.stock.common.dao">
+        </property>
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.douglas.stock.common.dao"></property>
+    </bean>
+
+    <bean id="recordService" class="com.douglas.stock.common.dao.DBRecordService" autowire="byType">
+    </bean>
+    <bean name="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+
+    <tx:advice id="userTxAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="delete*" propagation="REQUIRED" read-only="false"
+                       rollback-for="java.lang.Exception" no-rollback-for="java.lang.RuntimeException"/>
+            <tx:method name="insert*" propagation="REQUIRED" read-only="false"
+                       rollback-for="java.lang.RuntimeException" />
+            <tx:method name="update*" propagation="REQUIRED" read-only="false"
+                       rollback-for="java.lang.Exception" />
+
+            <tx:method name="find*" propagation="SUPPORTS"/>
+            <tx:method name="get*" propagation="SUPPORTS"/>
+            <tx:method name="select*" propagation="SUPPORTS"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <aop:config>
+        <aop:pointcut id="pc" expression="execution(public * com.douglas.stock.common.dao.DBRecordDao.*(..))" /> <!--把事务控制在Service层-->
+        <aop:advisor pointcut-ref="pc" advice-ref="userTxAdvice" />
+    </aop:config>
+
+
+
+    <!--writers-->
+    <bean id="fileWriter" class="com.douglas.stock.com.douglas.stock.crawler.writer.FileRecordWriter">
+        <property name="filename" value="dumpFile"/>
+    </bean>
+    <bean id="dbWriter" class="com.douglas.stock.com.douglas.stock.crawler.writer.DbRecordWriter">
+        <property name="service" ref="recordService"/>
+    </bean>
+
+
+
+    <!--proxys-->
+    <!--<bean id="proxysFromFile" class="com.douglas.stock.common.ProxysFromFile">-->
+    <!--<constructor-arg value="proxys"/>-->
+    <!--</bean>-->
+
+    <bean id="proxysFromUrl" class="com.douglas.stock.proxyservice.consumer.ProxyConsumer">
+        <property name="requestUrl" value="http://127.0.0.1:8080/getForUse"/>
+    </bean>
+
+
+
+    <!--http requester-->
+    <bean id="commonRequester" class="com.douglas.stock.common.CommonHttpRequester">
+        <property name="connectTimeOut" value="10000"/>
+        <property name="readTimeOut" value="30000"/>
+        <property name="contentLengthLimit" value="200"/>
+        <property name="proxys" ref="proxysFromUrl"/>
+        <property name="userAgents">
+            <list>
+                <value>"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/22.0.1207.1 Safari/537.1"</value>
+                <value>"Mozilla/5.0 (X11; CrOS i686 2268.111.0) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11"</value>
+                <value>"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.6 (KHTML, like Gecko) Chrome/20.0.1092.0 Safari/536.6"</value>
+                <value>"Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.6 (KHTML, like Gecko) Chrome/20.0.1090.0 Safari/536.6"</value>
+                <value>"Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/19.77.34.5 Safari/537.1"</value>
+                <value>"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.9 Safari/536.5"</value>
+                <value>"Mozilla/5.0 (Windows NT 6.0) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.36 Safari/536.5"</value>
+                <value>"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1063.0 Safari/536.3"</value>
+                <value>"Mozilla/5.0 (Windows NT 5.1) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1063.0 Safari/536.3"</value>
+                <value>"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_0) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1063.0 Safari/536.3"</value>
+                <value>"Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1062.0 Safari/536.3"</value>
+                <value>"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1062.0 Safari/536.3"</value>
+                <value>"Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1061.1 Safari/536.3"</value>
+                <value>"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1061.1 Safari/536.3"</value>
+                <value>"Mozilla/5.0 (Windows NT 6.1) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1061.1 Safari/536.3"</value>
+                <value>"Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1061.0 Safari/536.3"</value>
+                <value>"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.24 (KHTML, like Gecko) Chrome/19.0.1055.1 Safari/535.24"</value>
+                <value>"Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/535.24 (KHTML, like Gecko) Chrome/19.0.1055.1 Safari/535.24"</value>
+            </list>
+        </property>
+        <property name="noProxyDomains">
+            <set>
+                <value>www.bestgo.com</value>
+            </set>
+        </property>
+    </bean>
+
+
+
+    <!--spider entity-->
+    <bean id="bestgoSpider" class="com.douglas.stock.com.douglas.stock.crawler.CommonSpider">
+        <constructor-arg name="crawlPath" value="runDir"/>
+        <property name="seedManager" ref="seedManager"/>
+        <property name="httpRequester" ref="commonRequester"/>
+
+        <property name="retry" value="10000"/>
+        <property name="threads" value="100"/>
+        <property name="rule" ref="regexRule"/>
+
+        <property name="processorHashMap">
+            <map>
+                <entry key="http://www.bestgo.com/(hd|fund)/\d{8}/([\d,]*\.html)?" value-ref="bestgoProcessor"></entry>
+                <entry key="http://www.shdjt.com/gpdm.asp\?(page=(\d){1,2}&amp;)?gpdm=\d{6}" value-ref="shdjtGeguProcessor"></entry>
+            </map>
+        </property>
+
+        <property name="writerChain">
+            <list>
+                <!--<ref bean="fileWriter"/>-->
+                <ref bean="dbWriter"/>
+            </list>
+        </property>
+        <property name="traceLink" value="false"/>
+    </bean>
+
+    <!--1. seed-->
+    <!--2. regex rule-->
+    <!--3. writer-->
+
+</beans>

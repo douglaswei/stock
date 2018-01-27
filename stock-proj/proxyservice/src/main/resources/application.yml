@@ -1,0 +1,5 @@
+#consumerNum: 100
+#connectTimeout: 2000
+#readTimeout: 3000
+#validInterval: 5000
+#proxyReuseInterval: 4000

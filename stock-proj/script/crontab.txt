@@ -1,0 +1,1 @@
+0 19 * * * cd pwd && sh script/crawl.sh && sh script/extract_feature.sh

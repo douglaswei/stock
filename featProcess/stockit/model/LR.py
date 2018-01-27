@@ -83,10 +83,13 @@ class LR():
 
         is_postive_sample = True if pos_count > neg_count else False
 
-        self.sample(self.feature_raw_train_path, self.feature_train_path, is_postive_sample, pos_count, neg_count)
+        # self.sample(self.feature_raw_train_path, self.feature_train_path, is_postive_sample, pos_count, neg_count)
+
+        cmd = 'cut -f 1,4- %s | cut -d ":" -f 2- > %s' % (self.feature_raw_train_path, self.feature_train_path)
+        exec_cmd(cmd, 'extract from raw train feature')
 
         cmd = 'cut -f 1,4- %s | cut -d ":" -f 2- > %s' % (self.feature_raw_predict_path, self.feature_predict_path)
-        (status, output) = commands.getstatusoutput(cmd)
+        exec_cmd(cmd, 'extract from raw predict feature')
         return
 
     def train_and_predict(self, work_path, raw_feature_path):

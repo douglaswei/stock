@@ -25,7 +25,7 @@ class FeatManager:
             label, code, date = field_map.get(labelName), field_map.get(codeName), field_map.get(dateName)
 
             out_file = self.predictFile if len(label) == 0 else self.trainFile
-            label_res = label < 0 and 0 or 1
+            label_res = 0 if len(label) == 0 else 0 if float(label) <= 0 else 1
 
             out_str = "%s:%f\t%s:%s\t%s:%s" % (labelName, label_res, codeName, code, dateName, date)
 
@@ -62,7 +62,9 @@ class FeatManager:
             raw_feature_map = dict(kvs)
             label, code, date = raw_feature_map.get(labelName), raw_feature_map.get(codeName), raw_feature_map.get(
                 dateName)
-            label_res = 0 if (len(label) == 0 or float(label) <= 0) else float(float(label) / 30)
+            # label_res = 0 if (len(label) == 0 or float(label) <= 0) else float(float(label) / 30)
+            label_res = 0 if len(label) == 0 else float(label) / 50
+            label_res = pow(label_res, 0.5) if label_res > 0 else label_res
 
             feature_map = dict(map(lambda (v, s, m): [v[0], (float(v[1]) - m) / s],
                                    zip(kvs[feat_beg_idx:], feature_spans, feature_min_values)))

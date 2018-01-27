@@ -105,9 +105,9 @@
     <!--db writer stuff-->
     <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
         <property name="driverClassName" value="com.mysql.jdbc.Driver"></property>
-        <property name="url" value="jdbc:mysql://10.0.34.219:3306/stock_data?useUnicode=true&amp;characterEncoding=UTF-8&amp;zeroDateTimeBehavior=convertToNull"></property>
-        <property name="username" value="root"></property>
-        <property name="password" value="111"></property>
+        <property name="url" value="jdbc:mysql://10.0.128.115:3306/test?useUnicode=true&amp;characterEncoding=UTF-8&amp;zeroDateTimeBehavior=convertToNull"></property>
+        <property name="username" value="robot_bi"></property>
+        <property name="password" value="robot_bi_test"></property>
         <property name="maxActive" value="200"></property>
         <property name="maxIdle" value="30"></property>
         <property name="maxWait" value="500"></property>
@@ -168,7 +168,7 @@
     <!--</bean>-->
 
     <bean id="proxysFromUrl" class="com.douglas.stock.proxyservice.consumer.ProxyConsumer">
-        <property name="requestUrl" value="http://10.0.34.219:8080/getForUse"/>
+        <property name="requestUrl" value="http://127.0.0.1:8080/getForUse"/>
     </bean>
 
 

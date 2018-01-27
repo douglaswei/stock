@@ -1,8 +1,17 @@
 package com.douglas.stock.proxyservice.extract;
 
-import com.douglas.stock.proxyservice.EnhancedProxy;
+import com.douglas.stock.proxyservice.aop.TimeInfo;
+import com.douglas.stock.proxyservice.bean.EnhancedProxy;
+import com.douglas.stock.proxyservice.extract.dl.BaseSpout;
+import com.douglas.stock.proxyservice.extract.dl.KDL;
+import com.douglas.stock.proxyservice.extract.dl.YDL;
+import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -13,34 +22,29 @@ import java.util.concurrent.LinkedBlockingDeque;
 /**
  * Created by wgz on 15/4/3.
  */
+@Configuration
 public class ProxyGenerator {
-    private Logger logger = LoggerFactory.getLogger(ProxyGenerator.class);
-    private static ProxyGenerator ourInstance = new ProxyGenerator();
+    private final static Logger logger = LoggerFactory.getLogger(ProxyGenerator.class);
     private static Random random = new Random();
 
-    public static ProxyGenerator getInstance() {
-        return ourInstance;
-    }
+    @Autowired
+    private ProxyValidator proxyValidator;
 
-    private ProxyGenerator() {
-    }
-
-    private Chain producerChain;
-    private int consumerNum = 100;
+    @Value("${consumerNum:500}")
+    private int consumerNum;
     private BlockingDeque<EnhancedProxy> proxiesQueue;
     private Set<EnhancedProxy> proxyRes;
     private List<EnhancedProxy> proxyList;
-    private int connectTimeout = 3000;
-    private int readTimeout = 5000;
-    private int validInterval = 5000;
-    private int proxyReuseInterval = 4000;
+    @Value("${connectTimeout:3000}")
+    private int connectTimeout;
+    @Value("${readTimeout:5000}")
+    private int readTimeout;
+    @Value("${validInterval:5000}")
+    private int validInterval;
+    @Value("${proxyReuseInterval:4000}")
+    private int proxyReuseInterval;
 
-    public Chain getProducerChain() {
-        return producerChain;
-    }
-
-    public void setProducerChain(Chain producerChain) {
-        this.producerChain = producerChain;
+    public ProxyGenerator() {
     }
 
     public int getConsumerNum() {
@@ -107,61 +111,51 @@ public class ProxyGenerator {
         this.proxyReuseInterval = proxyReuseInterval;
     }
 
-    private class Consuemer extends Thread {
-        public void run() {
-            while (true) {
-                try {
-                    EnhancedProxy proxy = proxiesQueue.take();
-                    if (!proxy.isValid()) {
-                        return;
-                    }
-                    int interval = ProxyValidater.validate(proxy, connectTimeout, readTimeout, validInterval);
-                    if (interval >= 0) {
-                        synchronized (proxyRes) {
-                            if (proxyRes != null) {
-                                proxyRes.add(proxy);
-                                logger.info("add proxy: {}", proxy);
-                            }
-                        }
-                    }
-                } catch (InterruptedException e) {
-                    return;
-                }
-            }
-        }
-    }
-
-    public void run() throws InterruptedException {
+    @TimeInfo
+    @Scheduled(fixedDelay = 12 * 60 * 60 * 1000)
+    public synchronized void run() throws InterruptedException {
         BlockingDeque<EnhancedProxy> newProxyQueue = new LinkedBlockingDeque<EnhancedProxy>();
         Set<EnhancedProxy> newProxyRes = new HashSet<>();
         proxiesQueue = newProxyQueue;
         proxyRes = newProxyRes;
 
-
-        List<Consuemer> consuemers = new ArrayList<Consuemer>();
+        // start consumer
+        List<Consumer> consumers = new ArrayList<Consumer>();
         for (int idx = 0; idx < consumerNum; ++idx) {
-            Consuemer consuemer = new Consuemer();
-            consuemers.add(consuemer);
-            consuemer.start();
+            Consumer consumer = new Consumer();
+            consumers.add(consumer);
+            consumer.start();
         }
 
-        producerChain = new Chain();
-        List<String> seeds = new ArrayList<String>();
-        seeds.add("http://www.youdaili.net/Daili/http/");
-        seeds.add("http://www.youdaili.net/Daili/guonei/");
-        seeds.add("http://www.youdaili.net/Daili/guowai/");
-        seeds.add("http://www.youdaili.net/Daili/Socks/");
-        producerChain.setSeeds(seeds);
-        producerChain.extract(proxiesQueue);
+        // start spout list
+        ArrayList<BaseSpout> spoutList = Lists.newArrayList(
+//                new KDL(proxiesQueue),
+//                new YDL(proxiesQueue)
+        );
 
+
+        spoutList.clear();
+        spoutList.add(new KDL(proxiesQueue));
+
+        for (BaseSpout spout : spoutList) {
+            spout.start();
+        }
+
+        // join spout list
+        for (BaseSpout spout : spoutList) {
+            spout.join();
+        }
+
+        // push end nodes
         EnhancedProxy endProxy = new EnhancedProxy(Proxy.Type.HTTP, new InetSocketAddress("127.0.0.1", 0), 0);
         endProxy.setValid(false);
         for (int idx = 0; idx < consumerNum; ++idx) {
             proxiesQueue.put(endProxy);
         }
 
-        for (Consuemer consuemer : consuemers) {
-            consuemer.join();
+        // join consumers
+        for (Consumer consumer : consumers) {
+            consumer.join();
         }
         setProxyList(new ArrayList<EnhancedProxy>(proxyRes));
         logger.info("finish try all proxies, final: [{}]", proxyRes.size());
@@ -205,6 +199,33 @@ public class ProxyGenerator {
                 return true;
             }
             return false;
+        }
+    }
+
+    private class Consumer extends Thread {
+        public void run() {
+            while (true) {
+                try {
+                    EnhancedProxy proxy = proxiesQueue.take();
+                    if (!proxy.isValid()) {
+                        return;
+                    }
+                    if (proxyRes.contains(proxy)) {
+                        continue;
+                    }
+                    int interval = proxyValidator.validate(proxy, connectTimeout, readTimeout, validInterval);
+                    if (interval >= 0) {
+                        synchronized (proxyRes) {
+                            if (proxyRes != null) {
+                                proxyRes.add(proxy);
+                                logger.info("add proxy: {}", proxy);
+                            }
+                        }
+                    }
+                } catch (InterruptedException e) {
+                    return;
+                }
+            }
         }
     }
 }

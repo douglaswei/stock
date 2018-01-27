@@ -57,16 +57,19 @@ public class Calculation {
             return;
         }
         float[] maFuquan = getElesByName(records, 0, records.size(), "maFuquan");
-        for (int idx=records.size()-1; idx >= recordsTrainPredict.getTrainBeg(); --idx) {
+        DBRecord last = records.get(records.size()-1);
+        last.setEma12(maFuquan[records.size() - 1]);
+        last.setEma26(maFuquan[records.size() - 1]);
+        for (int idx=records.size()-2; idx >= recordsTrainPredict.getTrainBeg(); --idx) {
             DBRecord cur = records.get(idx);
-            cur.setEma12(sMean(maFuquan, idx, 12));
-            cur.setEma26(sMean(maFuquan, idx, 26));
+            cur.setEma12(maFuquan[idx] * 2 / 13 + records.get(idx + 1).getEma12() * 11 / 13);
+            cur.setEma26(maFuquan[idx] * 2 / 27 + records.get(idx + 1).getEma12() * 25 / 27);
             cur.setDiff(cur.getEma12() - cur.getEma26());
-            float prevEda = 0;
+            float prevDea = 0;
             if (idx + 1 < records.size()) {
-                prevEda = records.get(idx+1).getDea();
+                prevDea = records.get(idx+1).getDea();
             }
-            cur.setDea((float) (prevEda * 0.8 + cur.getDiff() * 0.2));
+            cur.setDea((float) (prevDea * 0.8 + cur.getDiff() * 0.2));
             cur.setMacd(2*(cur.getDiff() - cur.getDea()));
         }
     }
@@ -90,8 +93,11 @@ public class Calculation {
         float sum = 0;
         for (int idx = beg; idx < end; ++idx) {
             sum += args[idx];
+            if (idx == beg) {
+                sum += args[idx];
+            }
         }
-        return sum / args.length;
+        return sum / (len + 1);
     }
 
     public static Field getFieldByName(Class type, String name) {

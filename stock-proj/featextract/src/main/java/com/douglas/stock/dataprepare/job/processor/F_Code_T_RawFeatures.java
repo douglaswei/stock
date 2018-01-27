@@ -2,10 +2,9 @@ package com.douglas.stock.dataprepare.job.processor;
 
 import com.douglas.stock.common.Config;
 import com.douglas.stock.common.dao.DBRecord;
-import com.douglas.stock.common.job.ProcessorUseInput;
-import com.douglas.stock.common.job.ProcessorUseInputOutput;
-import com.douglas.stock.dataprepare.common.RawFeatures;
 import com.douglas.stock.common.job.ProcessResult;
+import com.douglas.stock.common.job.ProcessorUseInput;
+import com.douglas.stock.dataprepare.common.RawFeatures;
 import com.douglas.stock.dataprepare.common.RecordsTrainPredict;
 import com.douglas.stock.dataprepare.extract.BasicExtractor;
 import com.douglas.stock.dataprepare.extract.ExtractorInterface;
@@ -46,7 +45,9 @@ public class F_Code_T_RawFeatures extends ProcessorUseInput {
         recordsTrainPredict.setTrain(false);
         recordsTrainPredict.setTrainBeg(0);
         recordsTrainPredict.setTrainEnd(Config.getTrainWindow());
-        RawFeatures rawFeatures = extractor.extract(recordsTrainPredict);
+        if (recordsTrainPredict.getRecords().size() >= Config.getTrainWindow()) {
+            RawFeatures rawFeatures = extractor.extract(recordsTrainPredict);
+        }
 
         // process train records
         recordsTrainPredict.setTrain(true);
@@ -54,7 +55,7 @@ public class F_Code_T_RawFeatures extends ProcessorUseInput {
             recordsTrainPredict.setLabelBeg(idx);
             recordsTrainPredict.setTrainBeg(idx + Config.getLabelWindow());
             recordsTrainPredict.setTrainEnd(idx + Config.getWindow());
-            rawFeatures = extractor.extract(recordsTrainPredict);
+            RawFeatures rawFeatures = extractor.extract(recordsTrainPredict);
         }
         return ProcessResult.SUCCESS;
     }

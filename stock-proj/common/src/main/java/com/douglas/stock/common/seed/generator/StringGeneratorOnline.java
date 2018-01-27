@@ -1,7 +1,6 @@
 package com.douglas.stock.common.seed.generator;
 
 import cn.edu.hfut.dmic.webcollector.net.HttpResponse;
-import com.douglas.stock.common.CommonHttpRequester;
 import com.douglas.stock.common.PageCrawler;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -53,14 +52,8 @@ public class StringGeneratorOnline implements StringGenerator {
     }
 
     private List<String> getSeedCodes(String url) {
-        //CommonHttpRequester requester = new CommonHttpRequester();
-        HttpResponse response = PageCrawler.crawl(url, null, 5000, 10000, 10);
+        HttpResponse response = PageCrawler.crawl(url, null, 5000, 10000, true, 10);
         List<String> seeds = new ArrayList<String>();
-//        try {
-//            response = requester.getResponse(url);
-//        } catch (Exception e) {
-//            return null;
-//        }
         String content = new String(response.getContent());
         Elements elements = Xsoup.select(content, "//tbody[@id='datalist']//td/a").getElements();
         Pattern p = Pattern.compile("(\\d{6})");

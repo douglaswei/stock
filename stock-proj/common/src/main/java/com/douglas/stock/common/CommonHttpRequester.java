@@ -14,6 +14,7 @@ import java.net.HttpURLConnection;
 import java.net.Proxy;
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
@@ -32,6 +33,16 @@ public class CommonHttpRequester implements HttpRequester {
     private int readTimeOut = 20000;
     private int contentLengthLimit = 0;
     private Set<String> noProxyDomains;
+
+    protected Map<String, String> headers = null;
+
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
+
+    public void setHeaders(Map<String, String> headers) {
+        this.headers = headers;
+    }
 
     public Set<String> getNoProxyDomains() {
         return noProxyDomains;
@@ -86,6 +97,14 @@ public class CommonHttpRequester implements HttpRequester {
             con.setReadTimeout(readTimeOut);
 
             configConnection(con);
+
+            // 设置headers
+            if (headers != null) {
+                for (String key : headers.keySet()) {
+                    con.setRequestProperty(key, headers.get(key));
+                }
+            }
+
             code = con.getResponseCode();
             /*只记录第一次返回的code*/
             if (redirect == 0) {
@@ -107,7 +126,7 @@ public class CommonHttpRequester implements HttpRequester {
                     String originUrl = _URL.toString();
                     _URL = new URL(_URL, location);
                     response.setRealUrl(_URL.toString());
-                    LOG.info("redirect from " + originUrl + " to " + _URL.toString());
+                    LOG.debug("redirect from " + originUrl + " to " + _URL.toString());
                     continue;
                 default:
                     needBreak = true;

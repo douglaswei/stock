@@ -33,7 +33,7 @@ class DT():
             labels.append(0 if float(fields[0].split(':')[1]) == 0 else 1)
             descriptions.append(['_'.join(fields[1:3]), ])
 
-        return np.asarray(features), labels, descriptions
+        return np.asarray(features), np.asarray(labels), descriptions
 
 
     def save_res(self, descriptions, predict_res):

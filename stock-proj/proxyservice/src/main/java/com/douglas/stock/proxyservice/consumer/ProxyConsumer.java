@@ -11,7 +11,7 @@ import java.net.Proxy;
 /**
  * Created by wgz on 15/4/2.
  */
-public class ProxyConsumer extends Proxys{
+public class ProxyConsumer extends Proxys {
     private String requestUrl = "http://localhost:8080/getForUse";
     private CommonHttpRequester requester = new CommonHttpRequester();
 
@@ -51,8 +51,4 @@ public class ProxyConsumer extends Proxys{
                 new InetSocketAddress(hostPort[0], Integer.valueOf(hostPort[1])));
     }
 
-    public static void main(String[] args) {
-        Proxy proxy = new ProxyConsumer().nextProxy();
-        System.out.println(proxy);
-    }
 }

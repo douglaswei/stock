@@ -2,10 +2,10 @@ package com.douglas.stock.common;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Random;
 
 /**
@@ -13,26 +13,14 @@ import java.util.Random;
  */
 public class Sleeper {
     private final static Logger logger = LoggerFactory.getLogger(Sleeper.class);
-    private int dftMs = 10;
-    private HashMap<String, Integer> domainMsMap;
-    private boolean randomWait = false;
+
+    @Value("${sleeper.defaultMs}")
+    private Integer defaultMs;
+
+    @Value("${sleeper.randomWait}")
+    private boolean randomWait;
+
     private Random randomSeed = new Random();
-
-    public int getDftMs() {
-        return dftMs;
-    }
-
-    public void setDftMs(int dftMs) {
-        this.dftMs = dftMs;
-    }
-
-    public HashMap<String, Integer> getDomainMsMap() {
-        return domainMsMap;
-    }
-
-    public void setDomainMsMap(HashMap<String, Integer> domainMsMap) {
-        this.domainMsMap = domainMsMap;
-    }
 
     public void sleepByUrl(String httpUrl) {
         try {
@@ -49,16 +37,10 @@ public class Sleeper {
             url = new URL(httpUrl);
         } catch (MalformedURLException e) {
             logger.error("exception:", e);
-            return getDftMs();
+            return defaultMs;
         }
         String host = url.getHost();
-        Integer ms = getDftMs();
-        if (domainMsMap != null) {
-            ms = domainMsMap.get(host);
-        }
-        if (ms == null) {
-            ms = getDftMs();
-        }
+        Integer ms = defaultMs;
         ms = (int)(ms * nextRandom());
         return ms;
     }

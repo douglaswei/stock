@@ -15,7 +15,7 @@ public class Config {
     private static DBRecordService service;
     private static float labelThresholdUpper = 5;
     private static float labelThresholdLower = -5;
-    private static float exceptionUppder = 80;
+    private static float exceptionUpper = 80;
     private static float exceptionLower = -80;
     private static BufferedWriter bufferedWriter;
 
@@ -79,12 +79,12 @@ public class Config {
         Config.labelThresholdLower = labelThresholdLower;
     }
 
-    public static float getExceptionUppder() {
-        return exceptionUppder;
+    public static float getExceptionUpper() {
+        return exceptionUpper;
     }
 
-    public static void setExceptionUppder(float exceptionUppder) {
-        Config.exceptionUppder = exceptionUppder;
+    public static void setExceptionUpper(float exceptionUpper) {
+        Config.exceptionUpper = exceptionUpper;
     }
 
     public static float getExceptionLower() {

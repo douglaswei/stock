@@ -28,7 +28,7 @@ public interface DBRecordDao {
     @Delete("delete from gegu_page where code=#{code} and date=#{date}")
     public void deleteOne(@Param("code") String code, @Param("date") Date date);
 
-    @Delete("delete from gegu_page where code=#{code} and (ma=null or ma=0 or maGradient=null)")
+    @Delete("delete from gegu_page where code='' or (code=#{code} and (ma=null or ma=0 or maGradient=null))")
     public void deleteInvalidRecords(@Param("code") String code);
 
     @Update("update gegu_page set " +

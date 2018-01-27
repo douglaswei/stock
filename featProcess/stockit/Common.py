@@ -1,6 +1,8 @@
 import commands
 import json
 from urllib2 import urlopen
+import os
+import sys
 
 import numpy as np
 
@@ -30,7 +32,8 @@ def load_data_as_list(fpath):
 def exec_cmd(cmd, task_name):
     print '--- [%s] begin ---' % task_name
     print '--- [%s] cmd: ---\n' % task_name + cmd
-    (status, output) = commands.getstatusoutput(cmd)
+    real_cmd = "time " + cmd
+    (status, output) = commands.getstatusoutput(real_cmd)
     print '--- [%s] finish ---' % task_name
     print '--- [%s]result: %d ---' % (task_name, status)
     print '--- [%s] output: ---\n' % task_name + output
@@ -61,3 +64,7 @@ def get_current_info(stock_code):
     if len(data) == 0:
         return []
     return [data[0]['spj'], data[0]['zf'], ]
+
+def check_mkdir(path):
+    if not os.path.exists(path):
+        os.makedirs(path)

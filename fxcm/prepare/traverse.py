@@ -51,17 +51,6 @@ class Traverser():
           features.append(feature)
           if len(features) == len(self.time_cfg):
             yield features
-      # if len(feature) < slot_num:
-      #   continue
-      #
-      # # 保证当前应该填充位上无feature
-      # while len(features) > time_flag_idx:
-      #   features.pop()
-      # features.append(feature)
-      # if len(features) == len(self.time_cfg):
-      #   yield features
-
-    # self.traverse_file_by_span(item, slot_num)
 
   def get_feature(self, beg_time, end_time, slot_num, time_flag_idx):
     """
@@ -82,6 +71,4 @@ class Traverser():
         yield df[idx:idx + slot_num].reset_index().values
 
 
-trav = Traverser("/Users/wgz/proj/stock/fxcm/data", "EURUSD", ".csv")
-for features in trav.traverse(3):
-  print features
+

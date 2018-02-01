@@ -26,17 +26,17 @@ class Traverser():
       self.dfs[item_time] = pd.read_csv(file_path, index_col="time")
       # 补充其他数据 比如macd等
 
-    # for key, df in self.dfs.items():
-    #   ma_wrapper(df, 5)
-    #   ma_wrapper(df, 10)
-    #   ma_wrapper(df, 20)
-    #   if key >= 30:
-    #     macd(df)
-    #     kdj(df)
-    #     rsi(df, 6)
-    #     rsi(df, 12)
-    #     rsi(df, 14)
-    #     adx(df)
+    for key, df in self.dfs.items():
+      ma_wrapper(df, 5, 'ema')
+      ma_wrapper(df, 10, 'ema')
+      ma_wrapper(df, 20, 'ema')
+      if key >= 30:
+        macd(df)
+        kdj(df)
+        rsi(df, 6)
+        rsi(df, 12)
+        rsi(df, 14)
+        adx(df)
 
   def traverse(self, slot_num=30, cal_last_upper_flag=True):
     """

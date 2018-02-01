@@ -3,7 +3,7 @@ __author__ = 'wgz'
 
 import os
 import pandas as pd
-
+from process.process import ma_wrapper, macd, kdj, rsi, adx
 
 class Traverser():
 
@@ -24,6 +24,17 @@ class Traverser():
       file_path = ''.join([self.path_prefix, str(item_time), self.path_suffix])
       self.dfs[item_time] = pd.read_csv(file_path, index_col="time")
       # 补充其他数据 比如macd等
+
+    for key, df in self.dfs.items():
+      ma_wrapper(df, 5)
+      ma_wrapper(df, 10)
+      ma_wrapper(df, 20)
+      if key >= 60:
+        macd(df)
+        kdj(df)
+        rsi(df)
+        adx(df)
+
 
   def traverse(self, slot_num=30, cal_last_upper_flag=True):
     """

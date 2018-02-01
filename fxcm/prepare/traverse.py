@@ -5,6 +5,7 @@ import os
 import pandas as pd
 from process.process import ma_wrapper, macd, kdj, rsi, adx
 
+
 class Traverser():
 
   def __init__(self, path, item_name, path_suffix='.csv'):
@@ -29,12 +30,14 @@ class Traverser():
       ma_wrapper(df, 5)
       ma_wrapper(df, 10)
       ma_wrapper(df, 20)
-      if key >= 60:
+      if key >= 30:
         macd(df)
         kdj(df)
-        rsi(df)
+        rsi(df, 6)
+        rsi(df, 12)
+        rsi(df, 14)
         adx(df)
-
+    print df
 
   def traverse(self, slot_num=30, cal_last_upper_flag=True):
     """
@@ -75,11 +78,19 @@ class Traverser():
     df = self.dfs[time_flag][beg_time:end_time]
     if time_flag_idx != 0:
       # 高阶时间戳，需要丢弃最后一个元素
-        yield df[:-1].tail(slot_num).reset_index().values
+      yield df[:-1].tail(slot_num).reset_index().values
     else:
       # 可以从闭包做区间开始遍历
       for idx in range(0, df.shape[0] - slot_num):
         yield df[idx:idx + slot_num].reset_index().values
 
 
+if __name__ == '__main__':
+  pd.set_option('display.height', 1000)
+  pd.set_option('display.max_rows', 500)
+  pd.set_option('display.max_columns', 500)
+  pd.set_option('display.width', 1000)
 
+  trav = Traverser("/Users/wgz/proj/stock/fxcm/data", "EURUSD", ".csv")
+  for features in trav.traverse(40):
+    print features

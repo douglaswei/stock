@@ -106,15 +106,15 @@ def rsi(df, N):
 
 def adx(df):
   length = df.shape[0]
-  ref_c = df['close']
+  ref_c = df['close'].reset_index(drop=True)
   ref_c = pd.concat([pd.Series([ref_c[0], ]), ref_c], ignore_index=True)[:length]
-  hd = df['high'] - ref_c
-  ld = ref_c - df['low']
+  hd = df['high'].reset_index(drop=True) - ref_c
+  ld = ref_c - df['low'].reset_index(drop=True)
   mp = np.empty(length)
   dmp = np.empty(length)
   mm = np.empty(length)
   dmm = np.empty(length)
-  tr_i = np.max([np.abs(hd), np.abs(ld), df['high'] - df['low']], axis=0)
+  tr_i = np.max([np.abs(hd), np.abs(ld), df['high'].reset_index(drop=True) - df['low'].reset_index(drop=True)], axis=0)
   tr = np.empty(length)
 
   for i in range(length):
@@ -139,10 +139,9 @@ def adx(df):
   df.insert(len(df.columns), 'adx', adx_series)
   return df
 
-
 # test
 #
-# df = pd.read_csv("/Users/wgz/proj/stock/fxcm/data/EURUSD1440.csv")
+# df = pd.read_csv("/Users/wgz/proj/stock/fxcm/data/EURUSD30.csv")
 # ma_wrapper(df, 5)
 # ma_wrapper(df, 10)
 # ma_wrapper(df, 15)

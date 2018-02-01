@@ -7,17 +7,18 @@ import numpy as np
 
 
 def ma(series, N):
-  shape = df.shape
+  shape = series.shape
   kernel = np.ones(N) / N
   result = np.convolve(series, kernel)[:shape[0]]
   return result
 
 
 def ema(series, N):
+  shape = series.shape
   N = float(N)
   p = 2 / (N + 1)
   p_m = 1 - p
-  shape = series.shape
+
   result = np.empty(shape[0])
   result[0] = series[0]
   for idx in range(1, shape[0]):

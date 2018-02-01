@@ -26,18 +26,17 @@ class Traverser():
       self.dfs[item_time] = pd.read_csv(file_path, index_col="time")
       # 补充其他数据 比如macd等
 
-    for key, df in self.dfs.items():
-      ma_wrapper(df, 5)
-      ma_wrapper(df, 10)
-      ma_wrapper(df, 20)
-      if key >= 30:
-        macd(df)
-        kdj(df)
-        rsi(df, 6)
-        rsi(df, 12)
-        rsi(df, 14)
-        adx(df)
-    print df
+    # for key, df in self.dfs.items():
+    #   ma_wrapper(df, 5)
+    #   ma_wrapper(df, 10)
+    #   ma_wrapper(df, 20)
+    #   if key >= 30:
+    #     macd(df)
+    #     kdj(df)
+    #     rsi(df, 6)
+    #     rsi(df, 12)
+    #     rsi(df, 14)
+    #     adx(df)
 
   def traverse(self, slot_num=30, cal_last_upper_flag=True):
     """
@@ -57,7 +56,7 @@ class Traverser():
     for res in self.get_feature(beg_time, None, slot_num, 0):
       features = [res, ]
       for time_flag_idx in range(1, len(self.time_cfg)):
-        for feature in self.get_feature(None, features[0][0][0], slot_num, time_flag_idx):
+        for feature in self.get_feature(None, features[0].index[0], slot_num, time_flag_idx):
           if len(feature) < slot_num:
             break
           while len(features) > time_flag_idx:
@@ -78,11 +77,12 @@ class Traverser():
     df = self.dfs[time_flag][beg_time:end_time]
     if time_flag_idx != 0:
       # 高阶时间戳，需要丢弃最后一个元素
-      yield df[:-1].tail(slot_num).reset_index().values
+      yield df[:-1].tail(slot_num)
+      # yield df[:-1].tail(slot_num).reset_index().values
     else:
       # 可以从闭包做区间开始遍历
       for idx in range(0, df.shape[0] - slot_num):
-        yield df[idx:idx + slot_num].reset_index().values
+        yield df[idx:idx + slot_num]
 
 
 if __name__ == '__main__':
@@ -94,3 +94,4 @@ if __name__ == '__main__':
   trav = Traverser("/Users/wgz/proj/stock/fxcm/data", "EURUSD", ".csv")
   for features in trav.traverse(40):
     print features
+    print "------"
